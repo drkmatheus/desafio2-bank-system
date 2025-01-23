@@ -4,10 +4,12 @@
              version="3.0">
     <persistence-unit name="main" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-<!--        <class>entities.BankAccount</class>-->
-<!--        <class>entities.BankClient</class>-->
-<!--        <class>entities.BankAccountType</class>-->
-<!--        <class>entities.BankTransaction</class>-->
+<!--        <class>br.com.drkmatheus.entities.BankAccount</class>-->
+        <class>br.com.drkmatheus.entities.BankClient</class>
+        <class>br.com.drkmatheus.dao.BankClientDAOImpl</class>
+        <class>br.com.drkmatheus.service.BankClientService</class>
+<!--        <class>br.com.drkmatheus.entities.BankAccountType</class>-->
+<!--        <class>br.com.drkmatheus.entities.BankTransaction</class>-->
         <properties>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/bank_system?useSSL=FALSE&amp;serverTimezone=UTC"/>
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>

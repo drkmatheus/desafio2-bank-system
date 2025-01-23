@@ -8,16 +8,18 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
+import static java.util.regex.Pattern.matches;
+
 public class BankClientDAOImpl implements BankClientDAO {
 
     // pra estabelecer contrato de sessao (ler e escrever dados no BD)
     private final SessionFactory sessionFactory;
     // adiciona instancia do bcrypt
-    private final BCryptPasswordEncoder passwordEncoder;
+    //private final BCryptPasswordEncoder passwordEncoder;
 
     public BankClientDAOImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
-        this.passwordEncoder = new BCryptPasswordEncoder();
+        //this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
     @Override
@@ -39,7 +41,8 @@ public class BankClientDAOImpl implements BankClientDAO {
     public Optional<BankClient> login(String cpf, String rawPassword) {
         Optional<BankClient> clientOptional = findByCpf(cpf);
 
-        return clientOptional.filter(client -> passwordEncoder.matches(rawPassword, client.getPassword())
+        //return clientOptional.filter(client -> passwordEncoder.matches(rawPassword, client.getPassword()));
+        return clientOptional.filter(client -> matches(rawPassword, client.getPassword())
         );
     }
 
@@ -49,10 +52,10 @@ public class BankClientDAOImpl implements BankClientDAO {
             session.beginTransaction();
 
             // antes de salvar, codificar a senha
-            if (bankClient.getPassword() != null) {
-                bankClient.setPassword(passwordEncoder.encode(bankClient.getPassword())
-                );
-            }
+//            if (bankClient.getPassword() != null) {
+//                bankClient.setPassword(passwordEncoder.encode(bankClient.getPassword())
+//                );
+//            }
 
             session.save(bankClient);
             session.getTransaction().commit();

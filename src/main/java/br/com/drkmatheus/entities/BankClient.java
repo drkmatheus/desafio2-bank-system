@@ -2,6 +2,8 @@ package br.com.drkmatheus.entities;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "bank_client")
 public class BankClient {
@@ -18,7 +20,7 @@ public class BankClient {
     private String phone;
 
     @Column(name = "birthdate")
-    private String birthDate;
+    private LocalDate birthDate;
 
     @Column(name = "cpf")
     private String cpf;
@@ -31,7 +33,7 @@ public class BankClient {
 
     }
 
-    public BankClient(String clientName, String phone, String birthDate, String cpf, String password) {
+    public BankClient(String clientName, String phone, LocalDate birthDate, String cpf, String password) {
         this.clientName = clientName;
         this.phone = phone;
         this.birthDate = birthDate;
@@ -55,10 +57,6 @@ public class BankClient {
         this.clientName = clientName;
     }
 
-    public void setFirstName(String clientName) {
-        this.clientName = clientName;
-    }
-
     public String getPhone() {
         return phone;
     }
@@ -67,11 +65,11 @@ public class BankClient {
         this.phone = phone;
     }
 
-    public String getBirthDate() {
+    public LocalDate getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(String birthDate) {
+    public void setBirthDate(LocalDate birthDate) {
         this.birthDate = birthDate;
     }
 

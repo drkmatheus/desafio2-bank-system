@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!-- Configurações de conexão com o banco MySQL -->
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/bank_system</property>
+        <property name="hibernate.connection.username">springstudent</property>
+        <property name="hibernate.connection.password">springstudent</property>
+
+        <!-- MySQL -->
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</property>
+
+        <!-- Configurações de pool de conexões -->
+        <property name="hibernate.c3p0.min_size">5</property>
+        <property name="hibernate.c3p0.max_size">20</property>
+        <property name="hibernate.c3p0.timeout">300</property>
+        <property name="hibernate.c3p0.max_statements">50</property>
+        <property name="hibernate.c3p0.idle_test_period">3000</property>
+
+        <!-- Outras configurações importantes -->
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="show_sql">true</property>
+        <property name="format_sql">true</property>
+
+        <!-- Mapeamento das classes de entidade -->
+        <mapping class="br.com.drkmatheus.entities.BankClient"/>
+<!--        <mapping class="br.com.drkmatheus.entities.BankAccount"/>-->
+<!--        <mapping class="br.com.drkmatheus.entities.AccountType"/>-->
+<!--        <mapping class="br.com.drkmatheus.entities.BankTransaction"/>-->
+    </session-factory>
+</hibernate-configuration>
