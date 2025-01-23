@@ -23,16 +23,20 @@ public class BankClient {
     @Column(name = "cpf")
     private String cpf;
 
+    @Column(name = "password")
+    private String password;
+
 
     public BankClient() {
 
     }
 
-    public BankClient(String clientName, String phone, String birthDate, String cpf) {
+    public BankClient(String clientName, String phone, String birthDate, String cpf, String password) {
         this.clientName = clientName;
         this.phone = phone;
         this.birthDate = birthDate;
         this.cpf = cpf;
+        this.password = password;
     }
 
     public int getId() {
@@ -43,8 +47,12 @@ public class BankClient {
         this.id = id;
     }
 
-    public String getclientName() {
+    public String getClientName() {
         return clientName;
+    }
+
+    public void setClientName(String clientName) {
+        this.clientName = clientName;
     }
 
     public void setFirstName(String clientName) {
@@ -75,4 +83,11 @@ public class BankClient {
         this.cpf = cpf;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
