@@ -53,10 +53,10 @@ CREATE TABLE bank_transaction (
 );
 
 -- Exemplo de inserção de clientes
-INSERT INTO bank_client (name, cpf, phone, birthdate, password) 
+INSERT INTO bank_client (name, cpf, phone, birthdate, password)
 VALUES ('João Silva', '123.456.789-00', '11987654321', '1990-05-15', '$2a$10$GxQ5x4RjG4z3zMz3z4RjG4z3zMz3z4RjG4z3zMz3z4RjG4z3zMz3');
 
-INSERT INTO bank_client (name, cpf, phone, birthdate, password) 
+INSERT INTO bank_client (name, cpf, phone, birthdate, password)
 VALUES ('Maria Oliveira', '987.654.321-00', '11876543210', '1985-09-22', '$2a$10$GxQ5x4RjG4z3zMz3z4RjG4z3zMz3z4RjG4z3zMz3z4RjG4z3zMz3');
 
 -- Exemplo de criação de contas para os clientes
