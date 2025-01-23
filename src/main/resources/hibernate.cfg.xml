@@ -24,11 +24,12 @@
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="show_sql">true</property>
         <property name="format_sql">true</property>
+        <property name="hibernate.current_session_context_class">thread</property>
 
         <!-- Mapeamento das classes de entidade -->
         <mapping class="br.com.drkmatheus.entities.BankClient"/>
-<!--        <mapping class="br.com.drkmatheus.entities.BankAccount"/>-->
-<!--        <mapping class="br.com.drkmatheus.entities.AccountType"/>-->
+        <mapping class="br.com.drkmatheus.entities.BankAccount"/>
+        <mapping class="br.com.drkmatheus.entities.BankAccountType"/>
 <!--        <mapping class="br.com.drkmatheus.entities.BankTransaction"/>-->
     </session-factory>
 </hibernate-configuration>

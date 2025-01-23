@@ -3,9 +3,13 @@ package br.com.drkmatheus;
 import br.com.drkmatheus.config.HibernateUtil;
 import br.com.drkmatheus.dao.BankClientDAO;
 import br.com.drkmatheus.dao.BankClientDAOImpl;
+import br.com.drkmatheus.entities.BankAccount;
+import br.com.drkmatheus.entities.BankAccountType;
 import br.com.drkmatheus.entities.BankClient;
 import br.com.drkmatheus.service.BankClientService;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -58,15 +62,19 @@ public class BankSystemConsoleApp {
 
     private static void exibirMenuPrincipal() {
         System.out.println("\n--- SISTEMA BANCÁRIO ---");
-        System.out.println("1. Registrar Novo Cliente");
+        System.out.println("1. Abrir Conta");
         System.out.println("2. Fazer Login");
         System.out.println("3. Sair");
         System.out.print("Escolha uma opção: ");
     }
 
     private static void registrarNovoCliente() {
+        Session session = HibernateUtil.openSession();
+        Transaction transaction = null;
         try {
             BankClient novoCliente = new BankClient();
+            BankAccount novaConta = new BankAccount();
+            BankAccountType bankAccountType = new BankAccountType();
 
             System.out.print("Digite o nome completo: ");
             novoCliente.setClientName(scanner.nextLine());
@@ -87,15 +95,35 @@ public class BankSystemConsoleApp {
             novoCliente.setBirthDate(LocalDate.parse(dataNascimento,
                     DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
+            // Seleção do tipo de conta
+            System.out.println("Escolha o tipo de conta:");
+            System.out.println("1 - Conta Corrente");
+            System.out.println("2 - Conta Poupança");
+            System.out.println("3 - Conta Salário");
+            System.out.print("Digite o número do tipo de conta: ");
+
+            int tipoContaEscolhido = scanner.nextInt();
+            scanner.nextLine(); // Consumir nova linha
+
+            // Buscar o tipo de conta no banco de dados
+            BankAccountType accountType = session.get(BankAccountType.class, tipoContaEscolhido);
+            if (accountType == null) {
+                throw new IllegalArgumentException("Tipo de conta inexistente");
+            }
+
+            // Criação de uma nova conta associada ao tipo de conta
+            BankAccount account = new BankAccount();
+            account.setAccountType(accountType);
+
             // Coleta e validação de senha
             while (true) {
                 //System.out.print("Digite sua senha (mínimo 8 caracteres, com maiúsculas, minúsculas, números e caractere especial): ");
-                System.out.print("Digite sua senha (mínimo 5 caracteres: ");
+                System.out.print("Digite sua senha (mínimo 5 caracteres): ");
                 String senha = scanner.nextLine();
 
                 if (bankClientService.isPasswordStrong(senha)) {
                     try {
-                        bankClientService.registerNewClient(novoCliente, senha);
+                        bankClientService.registerNewClient(novoCliente, senha, tipoContaEscolhido);
                         System.out.println("Cliente cadastrado com sucesso!");
                         break;
                     } catch (IllegalArgumentException e) {
@@ -133,10 +161,30 @@ public class BankSystemConsoleApp {
         }
     }
 
+    private static BankAccountType buscarTipoContaPorId(int tipoContaEscolhido) {
+        try (Session session = HibernateUtil.openSession()) {
+            System.out.println("Buscando tipo de conta com ID: " + tipoContaEscolhido);
+
+            // Tente buscar o BankAccountType pelo ID diretamente
+            BankAccountType tipoConta = session.get(BankAccountType.class, tipoContaEscolhido);
+
+            if (tipoConta == null) {
+                System.out.println("Tipo de conta não encontrado. ID: " + tipoContaEscolhido);
+            } else {
+                System.out.println("Tipo de conta encontrado: " + tipoConta.getTypeName());
+            }
+
+            return tipoConta;
+        } catch (Exception e) {
+            System.out.println("Erro ao buscar tipo de conta no banco: " + e.getMessage());
+            return null;
+        }
+    }
+
     private static void exibirMenuClienteLogado(BankClient cliente) {
         while (true) {
             System.out.println("\n--- BEM-VINDO " + cliente.getClientName().toUpperCase() + " ---");
-            System.out.println("1. Ver Informações Pessoais");
+            System.out.println("1. Ver Informações Pessoais");;
             System.out.println("2. Voltar ao Menu Principal");
             System.out.print("Escolha uma opção: ");
 
@@ -163,4 +211,5 @@ public class BankSystemConsoleApp {
         System.out.println("Data de Nascimento: " +
                 cliente.getBirthDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
     }
+
 }

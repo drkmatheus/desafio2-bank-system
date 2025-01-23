@@ -3,6 +3,8 @@ package br.com.drkmatheus.entities;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "bank_client")
@@ -28,6 +30,8 @@ public class BankClient {
     @Column(name = "password")
     private String password;
 
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<BankAccount> bankAccounts = new ArrayList<>();
 
     public BankClient() {
 
@@ -88,4 +92,20 @@ public class BankClient {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public List<BankAccount> getBankAccounts() {
+        return bankAccounts;
+    }
+
+    public void setBankAccounts(List<BankAccount> bankAccounts) {
+        this.bankAccounts = bankAccounts;
+    }
+
+    // Método auxiliar para adicionar uma conta
+    public void addBankAccount(BankAccount bankAccount) {
+        bankAccounts.add(bankAccount);
+        bankAccount.setClient(this);
+    }
 }
+
+

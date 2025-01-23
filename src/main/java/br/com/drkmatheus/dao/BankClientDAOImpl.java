@@ -1,14 +1,14 @@
 package br.com.drkmatheus.dao;
 
+import br.com.drkmatheus.config.HibernateUtil;
 import br.com.drkmatheus.entities.BankClient;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
 
-import static java.util.regex.Pattern.matches;
 
 public class BankClientDAOImpl implements BankClientDAO {
 
@@ -39,11 +39,35 @@ public class BankClientDAOImpl implements BankClientDAO {
 
     @Override
     public Optional<BankClient> login(String cpf, String rawPassword) {
-        Optional<BankClient> clientOptional = findByCpf(cpf);
+        Session session = HibernateUtil.openSession();
 
-        //return clientOptional.filter(client -> passwordEncoder.matches(rawPassword, client.getPassword()));
-        return clientOptional.filter(client -> matches(rawPassword, client.getPassword())
-        );
+        try {
+            Query<BankClient> query = session.createQuery(
+                    "FROM BankClient WHERE cpf = :cpf", BankClient.class);
+            query.setParameter("cpf", cpf);
+
+            BankClient bankClient = query.uniqueResult();
+
+            if (bankClient == null) {
+                System.out.println("Cliente nao encontrado com o cpf: " + cpf);
+                return Optional.empty();
+            }
+
+            if (rawPassword.equals(bankClient.getPassword())) {
+                return Optional.of(bankClient);
+            }
+            else {
+                System.out.println("Senha incorreta. Tente novamente.");
+                return Optional.empty();
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+        finally {
+            session.close();
+        }
     }
 
     @Override
