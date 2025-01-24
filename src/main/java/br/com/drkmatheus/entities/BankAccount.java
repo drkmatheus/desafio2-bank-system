@@ -61,6 +61,7 @@ public class BankAccount {
 
     public void setAccountType(BankAccountType accountType) {
             this.accountType = accountType;
+            this.accountTypes = String.valueOf(accountType.getId());
     }
 
     public BigDecimal getBalance() {

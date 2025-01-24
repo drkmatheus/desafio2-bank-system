@@ -37,6 +37,7 @@ CREATE TABLE bank_account (
     id INT AUTO_INCREMENT PRIMARY KEY,
     client_id INT NOT NULL,
     account_type_id INT NOT NULL,
+    account_types VARCHAR(255) DEFAULT '',
     balance DECIMAL(10, 2) DEFAULT 0.00,
     FOREIGN KEY (client_id) REFERENCES bank_client(id) ON DELETE CASCADE,
     FOREIGN KEY (account_type_id) REFERENCES account_type(id) ON DELETE CASCADE

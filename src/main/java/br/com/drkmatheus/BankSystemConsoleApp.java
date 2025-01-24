@@ -24,7 +24,9 @@ public class BankSystemConsoleApp {
     private static SessionFactory sessionFactory;
     private static BankClientDAO bankClientDAO;
     private static BankClientService bankClientService;
+    private static BankAccountTypeDAO bankAccountTypeDAO;
     private static Scanner scanner;
+
 
     public static void main(String[] args) {
         // Inicialização
@@ -67,6 +69,8 @@ public class BankSystemConsoleApp {
         // Criar DAO e Serviço
         bankClientDAO = new BankClientDAOImpl(sessionFactory);
         bankClientService = new BankClientService(bankClientDAO);
+
+        bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
 
         // Iniciar Scanner
         scanner = new Scanner(System.in);
