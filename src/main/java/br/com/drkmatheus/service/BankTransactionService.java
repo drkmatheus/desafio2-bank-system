@@ -26,14 +26,15 @@ public class BankTransactionService {
     }
 
     public void withdraw(BankAccount account, BigDecimal amount) {
-        // Realiza o saque, verificando se o saldo é suficiente
-        if (account.getBalance().compareTo(amount) >= 0) {
-            account.setBalance(account.getBalance().subtract(amount)); // Atualiza o saldo
-            BankTransaction transaction = new BankTransaction(account, "Saque", amount);
-            bankTransactionDAO.saveTransaction(transaction); // Salva a transação no banco de dados
-        } else {
-            throw new IllegalArgumentException("Saldo insuficiente para o saque");
-        }
+        // realiza saque
+        account.withdraw(amount);
+
+        // atualiza conta no BD
+        bankAccountDAO.updateAccount(account);
+
+        // cria e salva transacao
+        BankTransaction transaction = new BankTransaction(account, "Saque", amount);
+        bankTransactionDAO.saveTransaction(transaction);
     }
 
     public void transfer(BankAccount sourceAccount, BankAccount targetAccount, BigDecimal amount) {

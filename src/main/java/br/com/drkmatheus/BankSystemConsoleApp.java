@@ -209,7 +209,8 @@ public class BankSystemConsoleApp {
                     realizarDeposito(account);
                     break;
                 case 4:
-                    return;
+                    realizarSaque(account);
+                    break;
                 case 5:
                     return;
                 case 6:
@@ -223,6 +224,7 @@ public class BankSystemConsoleApp {
             }
         }
     }
+
 
     private static void exibirInformacoesPessoais(BankClient cliente) {
         System.out.println("\n--- INFORMAÇÕES PESSOAIS ---");
@@ -247,6 +249,28 @@ public class BankSystemConsoleApp {
             System.out.println("Depósito realizado com sucesso!");
         } catch (Exception e) {
             System.out.println("Erro ao realizar depósito: " + e.getMessage());
+        }
+        finally {
+            session.close();
+        }
+    }
+    private static void realizarSaque(BankAccount account) {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        Session session = HibernateUtil.openSession();
+        BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session);
+        BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
+        BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
+        BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
+
+        System.out.print("Digite o valor a ser sacado: ");
+        BigDecimal amount = new BigDecimal(scanner.nextLine());
+
+        try {
+            bankTransactionService.withdraw(account, amount);
+            System.out.println("Saque realizado com sucesso!");
+        }
+        catch (Exception e) {
+            System.out.println("Erro ao realizar saque: " + e.getMessage());
         }
         finally {
             session.close();
