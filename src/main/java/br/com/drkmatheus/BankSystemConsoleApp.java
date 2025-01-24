@@ -255,6 +255,18 @@ public class BankSystemConsoleApp {
         BankAccount account = cliente.getBankAccounts().getFirst();
         while (true) {
             System.out.println("\n--- BEM-VINDO " + cliente.getClientName().toUpperCase() + " ---");
+            System.out.println("Você possui contas do tipo: \n");
+            // lista contas vinculadas ao cliente
+            if (cliente.getBankAccounts().isEmpty()) {
+                System.out.println("Nenhuma conta vinculada");
+            }
+            else {
+                for (BankAccount bankAccount : cliente.getBankAccounts()) {
+                    System.out.println("- " + bankAccount.getAccountType().getTypeName());
+                }
+            }
+            // exibe o menu principal
+            System.out.println("\n==== MENU =====");
             System.out.println("1. Ver Informações Pessoais");
             System.out.println("2. Abrir Outro Tipo de Conta");
             System.out.println("3. Deposito");
@@ -271,7 +283,8 @@ public class BankSystemConsoleApp {
                     exibirInformacoesPessoais(cliente);
                     break;
                 case 2:
-                    return;
+                    addAccountTypeToExistingAccount(cliente);
+                    break;
                 case 3:
                     realizarDeposito(account);
                     break;
@@ -292,6 +305,32 @@ public class BankSystemConsoleApp {
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
             }
+        }
+    }
+
+    private static void addAccountTypeToExistingAccount(BankClient cliente) {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
+        BankClientService bankClientService = new BankClientService(
+                new BankClientDAOImpl(sessionFactory),
+                new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO),
+                bankAccountTypeDAO
+        );
+
+        try {
+            System.out.println("Escolha o tipo de conta para adicionar:");
+            System.out.println("1 - Conta Corrente");
+            System.out.println("2 - Conta Poupança");
+            System.out.println("3 - Conta Salário");
+            int tipoContaEscolhido = lerInteiro("Digite o número do tipo de conta: ");
+
+            bankClientService.addAccountType(cliente, tipoContaEscolhido);
+        }
+        catch (Exception e) {
+            System.out.println("Erro ao adicionar tipo de conta: " + e.getMessage());
+        } finally {
+            session.close();
         }
     }
 

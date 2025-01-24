@@ -21,6 +21,14 @@ public class BankAccountTypeDAOImpl implements BankAccountTypeDAO {
     }
 
     @Override
+    public Optional<BankAccountType> findById(int id) {
+        try (Session session = sessionFactory.openSession()) {
+            BankAccountType bankAccountType = session.get(BankAccountType.class, id);
+            return Optional.ofNullable(bankAccountType);
+        }
+    }
+
+    @Override
     public Optional<BankAccountType> findByTypeName(String typeName) {
         try (Session session = sessionFactory.openSession()) {
             Query<BankAccountType> query = session.createQuery(
