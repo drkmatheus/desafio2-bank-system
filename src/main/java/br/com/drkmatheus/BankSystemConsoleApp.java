@@ -15,6 +15,7 @@ import org.hibernate.Transaction;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -219,13 +220,44 @@ public class BankSystemConsoleApp {
                     realizaTransferencia(account);
                     break;
                 case 7:
-                    return;
+                    imprimirExtrato(account);
+                    break;
                 case 0:
                     return;
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
             }
         }
+    }
+
+    private static void imprimirExtrato(BankAccount account) {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session);
+        BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
+        BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
+        BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
+
+        try {
+            // obter lista de extrato (transacoes)
+            List<BankTransaction> extrato = bankTransactionService.getTransactions(account);
+
+            // exibe o extrato
+            System.out.println("\n--- Extrato da Conta ---");
+            for (BankTransaction bankTransaction : extrato) {
+                System.out.printf("Data: %s | Tipo: %s | Valor: $ %.2f%n",
+                        bankTransaction.getTransactionDate(),
+                        bankTransaction.getTransactionType(),
+                        bankTransaction.getTransactionAmount());
+            }
+        }
+        catch (Exception e) {
+            System.out.println("Erro ao imprimir extrato: " + e.getMessage());
+        }
+        finally {
+            session.close();
+        }
+
     }
 
     private static void realizaTransferencia(BankAccount originAccount) {

@@ -62,17 +62,18 @@ public class BankTransactionService {
         bankTransactionDAO.saveTransaction(originTransaction);
         bankTransactionDAO.saveTransaction(targetTransaction);
 
-        originAccount.setBalance(originAccount.getBalance().subtract(amount)); // Atualiza o saldo da conta de origem
-            targetAccount.setBalance(targetAccount.getBalance().add(amount)); // Atualiza o saldo da conta de destino
-
-            // Salva as transações para ambas as contas
-            BankTransaction transaction = new BankTransaction(originAccount, "Transferência", amount);
-            bankTransactionDAO.saveTransaction(transaction); // Transação de débito na conta de origem
-
-            BankTransaction transactionTarget = new BankTransaction(targetAccount, "Transferência", amount);
-            bankTransactionDAO.saveTransaction(transactionTarget); // Transação de crédito na conta de destino
+//            originAccount.setBalance(originAccount.getBalance().subtract(amount)); // Atualiza o saldo da conta de origem
+//            targetAccount.setBalance(targetAccount.getBalance().add(amount)); // Atualiza o saldo da conta de destino
+//
+//            // Salva as transações para ambas as contas
+//            BankTransaction transaction = new BankTransaction(originAccount, "Transferência", amount);
+//            bankTransactionDAO.saveTransaction(transaction); // Transação de débito na conta de origem
+//
+//            BankTransaction transactionTarget = new BankTransaction(targetAccount, "Transferência", amount);
+//            bankTransactionDAO.saveTransaction(transactionTarget); // Transação de crédito na conta de destino
 
     }
+
 
     public List<BankTransaction> getTransactions(BankAccount account) {
         // Recupera o extrato da conta

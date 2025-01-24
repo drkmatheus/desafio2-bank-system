@@ -28,7 +28,7 @@ public class BankTransactionDAOImpl implements BankTransactionDAO {
 
     @Override
     public List<BankTransaction> getTransactionByAccountId(int accountId) {
-        return session.createQuery("FROM BankTransaction WHERE bankAccount.id = :accountId", BankTransaction.class)
+        return session.createQuery("FROM BankTransaction WHERE bankAccount.id = :accountId ORDER BY transactionDate DESC", BankTransaction.class)
                 .setParameter("accountId", accountId)
                 .getResultList();
     }
