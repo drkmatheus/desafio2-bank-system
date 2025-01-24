@@ -3,7 +3,11 @@ import jakarta.persistence.*;
 import org.hibernate.Session;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Entity
@@ -21,6 +25,10 @@ public class BankAccount {
     @ManyToOne
     @JoinColumn(name = "account_type_id", nullable = false)
     private BankAccountType accountType;
+
+    @Column(name = "account_types", nullable = false)
+    private String accountTypes; // armazena os tipos de conta como uma string (ex: "1,2,3")
+
 
     @Column(name = "balance", precision = 10, scale = 2)
     private BigDecimal balance;
@@ -89,6 +97,21 @@ public class BankAccount {
             throw new IllegalArgumentException("O valor deve ser maior que zero");
         }
         this.balance = balance.add(amount);
+    }
+
+    public Set<Integer> getAccountTypeIds() {
+        if (accountTypes == null || accountTypes.isEmpty()) {
+            return new HashSet<>();
+        }
+        return Arrays.stream(accountTypes.split(","))
+                .map(Integer::parseInt)
+                .collect(Collectors.toSet());
+    }
+
+    public void setAccountTypeIds(Set<Integer> accountTypeIds) {
+        this.accountTypes = accountTypeIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
     }
 
 //    public List<BankTransaction> getBankTransactions() {

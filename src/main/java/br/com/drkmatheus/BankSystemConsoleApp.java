@@ -18,6 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.Set;
 
 public class BankSystemConsoleApp {
     private static SessionFactory sessionFactory;
@@ -256,15 +257,24 @@ public class BankSystemConsoleApp {
         while (true) {
             System.out.println("\n--- BEM-VINDO " + cliente.getClientName().toUpperCase() + " ---");
             System.out.println("Você possui contas do tipo: \n");
+            // obtem a conta existente do cliente
+            BankAccount contaExistente = cliente.getBankAccounts().get(0);
+
             // lista contas vinculadas ao cliente
-            if (cliente.getBankAccounts().isEmpty()) {
+            Set<Integer> accountTypeIds = contaExistente.getAccountTypeIds();
+
+            if (accountTypeIds.isEmpty()) {
                 System.out.println("Nenhuma conta vinculada");
             }
             else {
-                for (BankAccount bankAccount : cliente.getBankAccounts()) {
-                    System.out.println("- " + bankAccount.getAccountType().getTypeName());
+                for (int tipoContaId : accountTypeIds) {
+                    BankAccountType accountType = bankAccountTypeDAO.findById(tipoContaId)
+                            .orElseThrow(() -> new IllegalArgumentException("Tipo de conta inexistente."));
+
+                    System.out.println("- " + accountType.getTypeName());
                 }
             }
+
             // exibe o menu principal
             System.out.println("\n==== MENU =====");
             System.out.println("1. Ver Informações Pessoais");

@@ -14,6 +14,7 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 
 public class BankClientService {
@@ -39,35 +40,27 @@ public class BankClientService {
         this.bankAccountTypeDAO = bankAccountTypeDAO;
     }
 
-
-    public void listarTiposDeContaVinculados(BankClient cliente) {
-        if (cliente.getBankAccounts().isEmpty()) {
-            System.out.println("Você não possui nenhuma conta vinculada.");
-        } else {
-            System.out.println("Tipos de conta vinculados:");
-            for (BankAccount conta : cliente.getBankAccounts()) {
-                System.out.println("- " + conta.getAccountType().getTypeName());
-            }
-        }
-    }
-
     public void addAccountType(BankClient bankClient, int accountType) {
         // Busca o tipo de conta no bd
         BankAccountType bankAccountType = bankAccountTypeDAO.findById(accountType).orElseThrow(() -> new IllegalArgumentException("Tipo de conta inexistente"));
 
+        // pega a conta existente do cliente
+        BankAccount contaExistente = bankClient.getBankAccounts().get(0);
+
         // verifica se cliente ja tem esse tipo de conta
+        Set<Integer> accountTypeIds = contaExistente.getAccountTypeIds();
+        if (accountTypeIds.contains(accountType)) {
+            throw new IllegalArgumentException("Você já possui uma conta desse tipo.");
+        }
+        // adiciona o novo tipo de conta a lista de tipos de conta
+        accountTypeIds.add(accountType);
+        contaExistente.setAccountTypeIds(accountTypeIds);
+
+        // atualiza a conta no bd
+        bankAccountDAO.updateAccount(contaExistente);
         if (bankClient.getBankAccounts().stream().anyMatch(account -> account.getAccountType().getId() == accountType)) {
             throw new IllegalArgumentException("Você já possui uma conta desse tipo.");
         }
-
-        // cria nova conta associada ao tipo de conta
-        BankAccount newAccount = new BankAccount();
-        newAccount.setClient(bankClient);
-        newAccount.setAccountType(bankAccountType);
-        newAccount.setBalance(BigDecimal.ZERO);
-
-        // salva nova conta no bd
-        bankAccountDAO.save(newAccount);
 
         System.out.println("Conta do tipo " + bankAccountType.getTypeName() + " adicionada com sucesso!");
     }
