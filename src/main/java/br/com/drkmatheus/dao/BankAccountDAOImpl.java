@@ -5,6 +5,7 @@ import br.com.drkmatheus.entities.BankAccountType;
 import br.com.drkmatheus.entities.BankClient;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -47,6 +48,19 @@ public class BankAccountDAOImpl implements BankAccountDAO {
             save(newBankAccount);
 
             return newBankAccount;
+        }
+    }
+
+    @Override
+    public void updateAccount(BankAccount bankAccount) {
+        Transaction tx = null;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.update(bankAccount);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new RuntimeException("Erro ao atualizar a conta", e);
         }
     }
 }

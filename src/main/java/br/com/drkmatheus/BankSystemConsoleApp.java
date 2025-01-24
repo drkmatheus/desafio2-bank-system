@@ -1,10 +1,7 @@
 package br.com.drkmatheus;
 
 import br.com.drkmatheus.config.HibernateUtil;
-import br.com.drkmatheus.dao.BankClientDAO;
-import br.com.drkmatheus.dao.BankClientDAOImpl;
-import br.com.drkmatheus.dao.BankTransactionDAO;
-import br.com.drkmatheus.dao.BankTransactionDAOImpl;
+import br.com.drkmatheus.dao.*;
 import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankAccountType;
 import br.com.drkmatheus.entities.BankClient;
@@ -237,9 +234,11 @@ public class BankSystemConsoleApp {
     }
 
     private static void realizarDeposito(BankAccount account) {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = HibernateUtil.openSession();
         BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session); // instanciando o DAO
-        BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO);
+        BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, new BankAccountTypeDAOImpl(sessionFactory));
+        BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
         System.out.print("Digite o valor a ser depositado: ");
         BigDecimal amount = new BigDecimal(scanner.nextLine());
 
@@ -248,6 +247,9 @@ public class BankSystemConsoleApp {
             System.out.println("Depósito realizado com sucesso!");
         } catch (Exception e) {
             System.out.println("Erro ao realizar depósito: " + e.getMessage());
+        }
+        finally {
+            session.close();
         }
     }
 }

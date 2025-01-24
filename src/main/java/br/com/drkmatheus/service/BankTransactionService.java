@@ -1,5 +1,7 @@
 package br.com.drkmatheus.service;
 
+import br.com.drkmatheus.dao.BankAccountDAO;
+import br.com.drkmatheus.dao.BankAccountDAOImpl;
 import br.com.drkmatheus.dao.BankTransactionDAO;
 import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankTransaction;
@@ -8,14 +10,17 @@ import java.util.List;
 
 public class BankTransactionService {
     private BankTransactionDAO bankTransactionDAO;
+    private BankAccountDAO bankAccountDAO;
 
-    public BankTransactionService(BankTransactionDAO bankTransactionDAO) {
+    public BankTransactionService(BankTransactionDAO bankTransactionDAO, BankAccountDAO bankAccountDAO) {
         this.bankTransactionDAO = bankTransactionDAO;
+        this.bankAccountDAO =  bankAccountDAO;
     }
 
     public void deposit(BankAccount account, BigDecimal amount) {
         // Realiza o depósito
         account.setBalance(account.getBalance().add(amount)); // Atualiza o saldo da conta
+        bankAccountDAO.updateAccount(account);
         BankTransaction transaction = new BankTransaction(account, "Depósito", amount);
         bankTransactionDAO.saveTransaction(transaction); // Salva a transação no banco de dados
     }

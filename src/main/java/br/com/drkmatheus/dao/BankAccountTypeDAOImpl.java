@@ -12,6 +12,10 @@ public class BankAccountTypeDAOImpl implements BankAccountTypeDAO {
 
     private SessionFactory sessionFactory;
 
+    public BankAccountTypeDAOImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
     }
