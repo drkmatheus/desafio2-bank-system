@@ -113,6 +113,11 @@ public class BankClientDAOImpl implements BankClientDAO {
     @Override
     public void save(BankClient bankClient) {
         try (Session session = sessionFactory.openSession()) {
+            // verificando se ja existe cliente com mesmo cpf
+            Optional<BankClient> check = findByCpf(bankClient.getCpf());
+            if (check.isPresent()) {
+                throw new IllegalArgumentException("Já existe um cliente cadastrado com este CPF.");
+            }
             session.beginTransaction();
 
             // antes de salvar, codificar a senha
@@ -125,7 +130,7 @@ public class BankClientDAOImpl implements BankClientDAO {
             session.getTransaction().commit();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Erro ao salvar o cliente", e);
         }
     }
 

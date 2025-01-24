@@ -1,6 +1,6 @@
 package br.com.drkmatheus;
 
-import br.com.drkmatheus.config.HibernateUtil;
+import br.com.drkmatheus.config.*;
 import br.com.drkmatheus.dao.*;
 import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankAccountType;
@@ -32,22 +32,30 @@ public class BankSystemConsoleApp {
         // Loop do menu principal
         while (true) {
             exibirMenuPrincipal();
-            int opcao = scanner.nextInt();
-            scanner.nextLine(); // Consumir nova linha
+            String opcao = scanner.nextLine();
 
-            switch (opcao) {
-                case 1:
-                    registrarNovoCliente();
-                    break;
-                case 2:
-                    realizarLogin();
-                    break;
-                case 3:
-                    System.out.println("Encerrando o sistema...");
-                    return;
-                default:
-                    System.out.println("Opção inválida. Tente novamente.");
+            // conversor de entrada pra nao quebrar o menu
+
+            try {
+                int opcaoEscolhida = Integer.parseInt(opcao);
+                switch (opcaoEscolhida) {
+                    case 1:
+                        registrarNovoCliente();
+                        break;
+                    case 2:
+                        realizarLogin();
+                        break;
+                    case 3:
+                        System.out.println("Encerrando o sistema...");
+                        return;
+                    default:
+                        System.out.println("Opção inválida. Tente novamente.");
+                }
             }
+            catch (NumberFormatException e) {
+                System.out.println("Entrada inválida. Digite um número.");
+            }
+
         }
     }
 
@@ -79,34 +87,87 @@ public class BankSystemConsoleApp {
             BankAccount novaConta = new BankAccount();
             BankAccountType bankAccountType = new BankAccountType();
 
-            System.out.print("Digite o nome completo: ");
-            novoCliente.setClientName(scanner.nextLine());
+            // validando nome
+            String name;
+            while (true) {
+                System.out.print("Digite o nome completo: ");
+                name = scanner.nextLine();
 
-            System.out.print("Digite o CPF (formato 000.000.000-00): ");
-            novoCliente.setCpf(scanner.nextLine());
-            while (bankClientDAO.cpfExists(novoCliente.getCpf())) {
-                System.out.println("CPF já existente");
-                System.out.print("Digite o CPF (formato 000.000.000-00): ");
-                novoCliente.setCpf(scanner.nextLine());
+                if (NameValidator.isValid(name)) {
+                    novoCliente.setClientName(name);
+                    break;
+                }
+                else {
+                    System.out.println("Nome inválido. Use apenas letras e um espaço entre palavras, sem espaços no início ou no fim.");
+                }
+
             }
 
-            System.out.print("Digite o telefone: ");
-            novoCliente.setPhone(scanner.nextLine());
+            // validando cpf
+            String cpf;
+            while (true) {
+                System.out.print("Digite o CPF (apenas numeros): ");
+                cpf = scanner.nextLine();
 
-            System.out.print("Digite a data de nascimento (dd/mm/yyyy): ");
-            String dataNascimento = scanner.nextLine();
-            novoCliente.setBirthDate(LocalDate.parse(dataNascimento,
-                    DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                if (!CpfValidator.isValid(cpf)) {
+                    System.out.println("CPF inválido. O CPF deve conter exatamente 11 dígitos numéricos.");
+                    continue;
+                }
+
+                if (bankClientDAO.cpfExists(cpf)) {
+                    System.out.println("CPF já cadastrado. Use outro.");
+                }
+                else {
+                    novoCliente.setCpf(cpf);
+                    break;
+               }
+
+            }
+
+//            while (bankClientDAO.cpfExists(novoCliente.getCpf())) {
+//                System.out.println("CPF já existente");
+//                System.out.print("Digite o CPF (formato 000.000.000-00): ");
+//                novoCliente.setCpf(scanner.nextLine());
+//            }
+
+            // validacao telefone
+            String phone;
+            while (true) {
+                System.out.print("Digite o telefone (apenas numeros e com DDD): ");
+                phone = scanner.nextLine();
+                if (PhoneValidator.isValid(phone)) {
+                novoCliente.setPhone(phone);
+                break;
+                }
+                else {
+                    System.out.println("Telefone inválido. Digite apenas números, com DDD (10 ou 11 dígitos).");
+                }
+
+            }
+
+            // validacao data de nascimento
+            String birthDate;
+            while (true) {
+                System.out.print("Digite a data de nascimento (dd/mm/aaaa): ");
+                birthDate = scanner.nextLine();
+
+                if (DateValidator.isValid(birthDate, "dd/MM/yyyy")) {
+                    novoCliente.setBirthDate(LocalDate.parse(birthDate, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+                    break;
+                }
+                else {
+                    System.out.println("Data de nascimento inválida. Digite no formato dd/mm/aaaa.");
+                }
+
+            }
+
 
             // Seleção do tipo de conta
             System.out.println("Escolha o tipo de conta:");
             System.out.println("1 - Conta Corrente");
             System.out.println("2 - Conta Poupança");
             System.out.println("3 - Conta Salário");
-            System.out.print("Digite o número do tipo de conta: ");
-
-            int tipoContaEscolhido = scanner.nextInt();
-            scanner.nextLine(); // Consumir nova linha
+            int tipoContaEscolhido = validarTipoConta();
 
             // Buscar o tipo de conta no banco de dados
             BankAccountType accountType = session.get(BankAccountType.class, tipoContaEscolhido);
@@ -146,6 +207,12 @@ public class BankSystemConsoleApp {
         try {
             System.out.print("Digite seu CPF: ");
             String cpf = scanner.nextLine();
+
+            // validando cpf
+            if (!CpfValidator.isValid(cpf)) {
+                System.out.println("CPF inválido. O CPF deve conter exatamente 11 dígitos numéricos.");
+                return;
+            }
 
             System.out.print("Digite sua senha: ");
             String senha = scanner.nextLine();
@@ -196,10 +263,8 @@ public class BankSystemConsoleApp {
             System.out.println("6. Transferência");
             System.out.println("7. Extrato");
             System.out.println("0. Voltar ao Menu Principal");
-            System.out.print("Escolha uma opção: ");
 
-            int opcao = scanner.nextInt();
-            scanner.nextLine(); // Consumir nova linha
+            int opcao = lerInteiro("Escolha uma opção: ");
 
             switch (opcao) {
                 case 1:
@@ -268,21 +333,17 @@ public class BankSystemConsoleApp {
         BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
         BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
 
-        System.out.println("Digite o ID da conta de destino: ");
-        int idDestino = Integer.parseInt(scanner.nextLine());
-
-        System.out.println("Digite o valor a ser transferido: ");
-        BigDecimal amount = new BigDecimal(scanner.nextLine());
-
         try {
+            int idDestino = lerInteiro("Digite o ID da conta de destino: ");
+
+            BigDecimal amount = lerBigDecimal("Digite o valor a ser transferido: ");
+
             // busca a conta de destino pelo ID
             BankAccount targetAccount = bankAccountDAO.findById(idDestino)
                     .orElseThrow(() -> new IllegalArgumentException("Conta de destino nao encontrada"));
-
             // realiza a transferencia
             bankTransactionService.transfer(originAccount, targetAccount, amount);
             System.out.println("Transferencia realizada com sucesso!");
-
         }
         catch (Exception e) {
             System.out.println("Erro ao realizar a transferencia: " + e.getMessage());
@@ -302,7 +363,7 @@ public class BankSystemConsoleApp {
 
         try {
             BigDecimal saldo = bankTransactionService.checkBalance(account);
-            System.out.println("Saldo atual: $ " + saldo);
+            System.out.println("Saldo atual: $" + saldo);
         }
         catch (Exception e) {
             System.out.println("Erro ao verificar saldo: " + e.getMessage());
@@ -328,8 +389,9 @@ public class BankSystemConsoleApp {
         BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session); // instanciando o DAO
         BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, new BankAccountTypeDAOImpl(sessionFactory));
         BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
-        System.out.print("Digite o valor a ser depositado: ");
-        BigDecimal amount = new BigDecimal(scanner.nextLine());
+
+
+        BigDecimal amount = lerBigDecimal("Digite o valor a ser depositado: ");
 
         try {
             bankTransactionService.deposit(account, amount);
@@ -349,8 +411,7 @@ public class BankSystemConsoleApp {
         BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
         BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
 
-        System.out.print("Digite o valor a ser sacado: ");
-        BigDecimal amount = new BigDecimal(scanner.nextLine());
+        BigDecimal amount = lerBigDecimal("Digite o valor a ser sacado: ");
 
         try {
             bankTransactionService.withdraw(account, amount);
@@ -361,6 +422,48 @@ public class BankSystemConsoleApp {
         }
         finally {
             session.close();
+        }
+    }
+
+    private static int lerInteiro(String mensagem) {
+        while (true) {
+            System.out.print(mensagem);
+            String entrada = scanner.nextLine();
+
+            try {
+                return Integer.parseInt(entrada);
+            }
+            catch (NumberFormatException e) {
+                System.out.println("Entrada inválida. Digite um numero.");
+            }
+        }
+    }
+
+    private static BigDecimal lerBigDecimal(String mensagem) {
+        while (true) {
+            System.out.print(mensagem);
+            String entrada = scanner.nextLine();
+
+            try {
+                return new BigDecimal(entrada);
+            }
+            catch (NumberFormatException e) {
+                System.out.println("Entrada inválida. Digite um numero.");
+            }
+        }
+    }
+
+    private static int validarTipoConta() {
+        while (true) {
+            int tipoConta = lerInteiro("Digite o tipo de conta: ");
+
+            // verifica se o tipo da conta está entre 1 e 3
+            if (tipoConta >= 1 && tipoConta <= 3) {
+                return tipoConta;
+            }
+            else {
+                System.out.println("Opção inválida. Tente novamente.");
+            }
         }
     }
 }
