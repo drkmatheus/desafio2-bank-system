@@ -25,50 +25,90 @@ public class BankClientDAOImpl implements BankClientDAO {
     @Override
     public Optional<BankClient> findByCpf(String cpf) {
         try (Session session = sessionFactory.openSession()) {
-            Query<BankClient> query = session.createQuery(
-                    "FROM BankClient WHERE cpf =:cpf", BankClient.class
-            );
+            String hql = "SELECT c FROM BankClient c LEFT JOIN FETCH c.bankAccounts WHERE c.cpf = :cpf";
+            Query<BankClient> query = session.createQuery(hql, BankClient.class);
             query.setParameter("cpf", cpf);
             return query.uniqueResultOptional();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();
         }
     }
+
+
+ //    @Override
+//    public Optional<BankClient> findByCpf(String cpf) {
+//        try (Session session = sessionFactory.openSession()) {
+//            Query<BankClient> query = session.createQuery(
+//                    "FROM BankClient WHERE cpf =:cpf", BankClient.class
+//            );
+//            query.setParameter("cpf", cpf);
+//            return query.uniqueResultOptional();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            return Optional.empty();
+//        }
+//    }
 
     @Override
     public Optional<BankClient> login(String cpf, String rawPassword) {
-        Session session = HibernateUtil.openSession();
+        try (Session session = sessionFactory.openSession()) {
+            // Busca o cliente pelo CPF, já carregando as contas bancárias
+            Optional<BankClient> optionalClient = findByCpf(cpf);
 
-        try {
-            Query<BankClient> query = session.createQuery(
-                    "FROM BankClient WHERE cpf = :cpf", BankClient.class);
-            query.setParameter("cpf", cpf);
-
-            BankClient bankClient = query.uniqueResult();
-
-            if (bankClient == null) {
-                System.out.println("Cliente nao encontrado com o cpf: " + cpf);
+            if (optionalClient.isEmpty()) {
+                System.out.println("Cliente não encontrado com o CPF: " + cpf);
                 return Optional.empty();
             }
 
+            BankClient bankClient = optionalClient.get();
+
+            // Verifica a senha
             if (rawPassword.equals(bankClient.getPassword())) {
                 return Optional.of(bankClient);
-            }
-            else {
+            } else {
                 System.out.println("Senha incorreta. Tente novamente.");
                 return Optional.empty();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();
         }
-        finally {
-            session.close();
-        }
     }
+
+//    @Override
+//    public Optional<BankClient> login(String cpf, String rawPassword) {
+//        Session session = HibernateUtil.openSession();
+//
+//        try {
+//            Query<BankClient> query = session.createQuery(
+//                    "FROM BankClient WHERE cpf = :cpf", BankClient.class);
+//            query.setParameter("cpf", cpf);
+//
+//            BankClient bankClient = query.uniqueResult();
+//
+//            if (bankClient == null) {
+//                System.out.println("Cliente nao encontrado com o cpf: " + cpf);
+//                return Optional.empty();
+//            }
+//
+//            if (rawPassword.equals(bankClient.getPassword())) {
+//                return Optional.of(bankClient);
+//            }
+//            else {
+//                System.out.println("Senha incorreta. Tente novamente.");
+//                return Optional.empty();
+//            }
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//            return Optional.empty();
+//        }
+//        finally {
+//            session.close();
+//        }
+//    }
 
     @Override
     public void save(BankClient bankClient) {

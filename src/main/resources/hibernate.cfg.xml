@@ -30,6 +30,6 @@
         <mapping class="br.com.drkmatheus.entities.BankClient"/>
         <mapping class="br.com.drkmatheus.entities.BankAccount"/>
         <mapping class="br.com.drkmatheus.entities.BankAccountType"/>
-<!--        <mapping class="br.com.drkmatheus.entities.BankTransaction"/>-->
+        <mapping class="br.com.drkmatheus.entities.BankTransaction"/>
     </session-factory>
 </hibernate-configuration>

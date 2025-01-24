@@ -8,8 +8,8 @@
         <class>br.com.drkmatheus.entities.BankClient</class>
         <class>br.com.drkmatheus.dao.BankClientDAOImpl</class>
         <class>br.com.drkmatheus.service.BankClientService</class>
-<!--        <class>br.com.drkmatheus.entities.BankAccountType</class>-->
-<!--        <class>br.com.drkmatheus.entities.BankTransaction</class>-->
+        <class>br.com.drkmatheus.entities.BankAccountType</class>
+        <class>br.com.drkmatheus.entities.BankTransaction</class>
         <properties>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/bank_system?useSSL=FALSE&amp;serverTimezone=UTC"/>
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>

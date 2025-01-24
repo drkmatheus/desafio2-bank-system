@@ -3,14 +3,18 @@ package br.com.drkmatheus;
 import br.com.drkmatheus.config.HibernateUtil;
 import br.com.drkmatheus.dao.BankClientDAO;
 import br.com.drkmatheus.dao.BankClientDAOImpl;
+import br.com.drkmatheus.dao.BankTransactionDAO;
+import br.com.drkmatheus.dao.BankTransactionDAOImpl;
 import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankAccountType;
 import br.com.drkmatheus.entities.BankClient;
 import br.com.drkmatheus.service.BankClientService;
+import br.com.drkmatheus.service.BankTransactionService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -182,10 +186,17 @@ public class BankSystemConsoleApp {
     }
 
     private static void exibirMenuClienteLogado(BankClient cliente) {
+        BankAccount account = cliente.getBankAccounts().getFirst();
         while (true) {
             System.out.println("\n--- BEM-VINDO " + cliente.getClientName().toUpperCase() + " ---");
-            System.out.println("1. Ver Informações Pessoais");;
-            System.out.println("2. Voltar ao Menu Principal");
+            System.out.println("1. Ver Informações Pessoais");
+            System.out.println("2. Abrir Outro Tipo de Conta");
+            System.out.println("3. Deposito");
+            System.out.println("4. Saque");
+            System.out.println("5. Verificar Saldo");
+            System.out.println("6. Transferência");
+            System.out.println("7. Extrato");
+            System.out.println("0. Voltar ao Menu Principal");
             System.out.print("Escolha uma opção: ");
 
             int opcao = scanner.nextInt();
@@ -196,6 +207,19 @@ public class BankSystemConsoleApp {
                     exibirInformacoesPessoais(cliente);
                     break;
                 case 2:
+                    return;
+                case 3:
+                    realizarDeposito(account);
+                    break;
+                case 4:
+                    return;
+                case 5:
+                    return;
+                case 6:
+                    return;
+                case 7:
+                    return;
+                case 0:
                     return;
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
@@ -212,4 +236,18 @@ public class BankSystemConsoleApp {
                 cliente.getBirthDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
     }
 
+    private static void realizarDeposito(BankAccount account) {
+        Session session = HibernateUtil.openSession();
+        BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session); // instanciando o DAO
+        BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO);
+        System.out.print("Digite o valor a ser depositado: ");
+        BigDecimal amount = new BigDecimal(scanner.nextLine());
+
+        try {
+            bankTransactionService.deposit(account, amount);
+            System.out.println("Depósito realizado com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro ao realizar depósito: " + e.getMessage());
+        }
+    }
 }
