@@ -52,6 +52,13 @@ public class BankAccountDAOImpl implements BankAccountDAO {
     }
 
     @Override
+    public Optional<BankAccount> findById(int id) {
+            try (Session session = sessionFactory.openSession()) {
+                return Optional.ofNullable(session.get(BankAccount.class, id));
+            }
+    }
+
+    @Override
     public void updateAccount(BankAccount bankAccount) {
         Transaction tx = null;
         try (Session session = sessionFactory.openSession()) {

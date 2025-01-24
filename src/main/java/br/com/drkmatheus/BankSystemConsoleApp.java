@@ -5,6 +5,7 @@ import br.com.drkmatheus.dao.*;
 import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankAccountType;
 import br.com.drkmatheus.entities.BankClient;
+import br.com.drkmatheus.entities.BankTransaction;
 import br.com.drkmatheus.service.BankClientService;
 import br.com.drkmatheus.service.BankTransactionService;
 import org.hibernate.Session;
@@ -212,9 +213,11 @@ public class BankSystemConsoleApp {
                     realizarSaque(account);
                     break;
                 case 5:
-                    return;
+                    verificarSaldo(account);
+                    break;
                 case 6:
-                    return;
+                    realizaTransferencia(account);
+                    break;
                 case 7:
                     return;
                 case 0:
@@ -222,6 +225,58 @@ public class BankSystemConsoleApp {
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
             }
+        }
+    }
+
+    private static void realizaTransferencia(BankAccount originAccount) {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session);
+        BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
+        BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
+        BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
+
+        System.out.println("Digite o ID da conta de destino: ");
+        int idDestino = Integer.parseInt(scanner.nextLine());
+
+        System.out.println("Digite o valor a ser transferido: ");
+        BigDecimal amount = new BigDecimal(scanner.nextLine());
+
+        try {
+            // busca a conta de destino pelo ID
+            BankAccount targetAccount = bankAccountDAO.findById(idDestino)
+                    .orElseThrow(() -> new IllegalArgumentException("Conta de destino nao encontrada"));
+
+            // realiza a transferencia
+            bankTransactionService.transfer(originAccount, targetAccount, amount);
+            System.out.println("Transferencia realizada com sucesso!");
+
+        }
+        catch (Exception e) {
+            System.out.println("Erro ao realizar a transferencia: " + e.getMessage());
+        }
+        finally {
+            session.close();
+        }
+    }
+
+    private static void verificarSaldo(BankAccount account) {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session);
+        BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
+        BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
+        BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
+
+        try {
+            BigDecimal saldo = bankTransactionService.checkBalance(account);
+            System.out.println("Saldo atual: $ " + saldo);
+        }
+        catch (Exception e) {
+            System.out.println("Erro ao verificar saldo: " + e.getMessage());
+        }
+        finally {
+            session.close();
         }
     }
 

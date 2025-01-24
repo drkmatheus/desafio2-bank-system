@@ -37,21 +37,41 @@ public class BankTransactionService {
         bankTransactionDAO.saveTransaction(transaction);
     }
 
-    public void transfer(BankAccount sourceAccount, BankAccount targetAccount, BigDecimal amount) {
-        // Realiza a transferência entre contas
-        if (sourceAccount.getBalance().compareTo(amount) >= 0) {
-            sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount)); // Atualiza o saldo da conta de origem
+    public BigDecimal checkBalance(BankAccount account) {
+        return account.getBalance();
+    }
+
+    public void transfer(BankAccount originAccount, BankAccount targetAccount, BigDecimal amount) {
+        // Realiza a verificacao da conta de origem para a transferência entre contas
+        if (originAccount.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Saldo insuficiente para realizar a transferencia.");
+        }
+
+        // realiza o saque na conta de origem
+        originAccount.withdraw(amount);
+        bankAccountDAO.updateAccount(originAccount);
+
+        // deposita o valor na conta de destino
+        targetAccount.deposit(amount);
+        bankAccountDAO.updateAccount(targetAccount);
+
+        // registra as 2 transacoces
+        BankTransaction originTransaction = new BankTransaction(originAccount, "Transferencia (Débito)", amount);
+        BankTransaction targetTransaction = new BankTransaction(targetAccount, "Transferencia (Crédito)", amount);
+
+        bankTransactionDAO.saveTransaction(originTransaction);
+        bankTransactionDAO.saveTransaction(targetTransaction);
+
+        originAccount.setBalance(originAccount.getBalance().subtract(amount)); // Atualiza o saldo da conta de origem
             targetAccount.setBalance(targetAccount.getBalance().add(amount)); // Atualiza o saldo da conta de destino
 
             // Salva as transações para ambas as contas
-            BankTransaction transaction = new BankTransaction(sourceAccount, "Transferência", amount);
+            BankTransaction transaction = new BankTransaction(originAccount, "Transferência", amount);
             bankTransactionDAO.saveTransaction(transaction); // Transação de débito na conta de origem
 
             BankTransaction transactionTarget = new BankTransaction(targetAccount, "Transferência", amount);
             bankTransactionDAO.saveTransaction(transactionTarget); // Transação de crédito na conta de destino
-        } else {
-            throw new IllegalArgumentException("Saldo insuficiente para a transferência");
-        }
+
     }
 
     public List<BankTransaction> getTransactions(BankAccount account) {
