@@ -229,8 +229,6 @@ public class BankSystemConsoleApp {
             if (clienteLogado.isPresent()) {
                 System.out.println("Login realizado com sucesso!");
                 exibirMenuClienteLogado(clienteLogado.get());
-            } else {
-                System.out.println("CPF ou senha inválidos");
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -294,9 +292,10 @@ public class BankSystemConsoleApp {
             System.out.println("6. Transferência");
             System.out.println("7. Extrato");
             System.out.println("8. Desativar conta");
+            System.out.println("9. Remover tipo de conta");
             System.out.println("0. Voltar ao Menu Principal");
 
-            int opcao = lerInteiro("Escolha uma opção: ");
+            int opcao = lerInteiro("Escolha uma opção");
 
             switch (opcao) {
                 case 1:
@@ -323,6 +322,9 @@ public class BankSystemConsoleApp {
                 case 8:
                     desativaConta(account);
                     break;
+                case 9:
+                    removeAccountTypeFromExistingAccount(cliente);
+                    break;
                 case 0:
                     return;
                 default:
@@ -342,7 +344,7 @@ public class BankSystemConsoleApp {
         System.out.println("Tem certeza que deseja desativar sua conta? Esta ação não poderá ser desfeita.");
         System.out.println("1 - Sim");
         System.out.println("2 - Não");
-        int opcao = lerInteiro("Digite sua opção: ");
+        int opcao = lerInteiro("Digite sua opção");
 
         if (opcao == 1) {
             try {
@@ -364,6 +366,38 @@ public class BankSystemConsoleApp {
         }
     }
 
+
+    private static void removeAccountTypeFromExistingAccount(BankClient cliente) {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        Session session = sessionFactory.openSession();
+        BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
+        BankClientService bankClientService = new BankClientService(
+                new BankClientDAOImpl(sessionFactory),
+                new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO),
+                bankAccountTypeDAO
+        );
+
+        try {
+            System.out.println("Escolha o tipo de conta para remover:");
+            System.out.println("1 - Conta Corrente");
+            System.out.println("2 - Conta Poupança");
+            System.out.println("3 - Conta Salário");
+            System.out.println("0 - Cancelar");
+            int tipoContaEscolhido = lerInteiro("Digite o número do tipo de conta");
+            switch (tipoContaEscolhido) {
+                case 0:
+                    return;
+            }
+
+            bankClientService.removeAccountType(cliente, tipoContaEscolhido);
+            System.out.println("Tipo de conta removido com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro ao remover tipo de conta: " + e.getMessage());
+        } finally {
+            session.close();
+        }
+    }
+
     private static void addAccountTypeToExistingAccount(BankClient cliente) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
@@ -380,7 +414,7 @@ public class BankSystemConsoleApp {
             System.out.println("2 - Conta Poupança");
             System.out.println("3 - Conta Salário");
             System.out.println("0 - Cancelar");
-            int tipoContaEscolhido = lerInteiro("Digite o número do tipo de conta: ");
+            int tipoContaEscolhido = lerInteiro("Digite o número do tipo de conta");
             switch (tipoContaEscolhido) {
                 case 0:
                     return;
@@ -445,19 +479,39 @@ public class BankSystemConsoleApp {
         }
 
         try {
-            int idDestino = lerInteiro("Digite o ID da conta de destino: ");
+            int idDestino = lerInteiro("Digite o ID da conta de destino");
+
+            if (idDestino <= 0) {
+                System.out.println("Erro: ID negativo.");
+                return;
+            }
 
             // verifica ID da conta de destino é o mesmo da conta de origem
             if (idDestino == originAccount.getIdAccount()) {
                 System.out.println("Erro: Voce nao pode transferir para a propria conta.");
                 return;
             }
+            // Busca a conta de destino pelo ID
+            Optional<BankAccount> optionalTargetAccount = bankAccountDAO.findById(idDestino);
+            if (!optionalTargetAccount.isPresent()) {
+                System.out.println("Erro: Conta de destino não encontrada.");
+                return;
+            }
 
-            BigDecimal amount = lerBigDecimal("Digite o valor a ser transferido: ");
+            BigDecimal amount = lerBigDecimal("Digite o valor a ser transferido");
 
-            // busca a conta de destino pelo ID
-            BankAccount targetAccount = bankAccountDAO.findById(idDestino)
-                    .orElseThrow(() -> new IllegalArgumentException("Conta de destino nao encontrada"));
+            // verifica se o valor é válido
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                System.out.println("Erro: O valor de transferência deve ser maior que zero.");
+                return;
+            }
+
+
+
+            BankAccount targetAccount = optionalTargetAccount.get();
+
+//            BankAccount targetAccount = bankAccountDAO.findById(idDestino)
+//                    .orElseThrow(() -> new IllegalArgumentException("Conta de destino nao encontrada"));
 
             // verifica se a conta de destino esta ativa
             if (!targetAccount.isActive()) {
@@ -523,7 +577,12 @@ public class BankSystemConsoleApp {
             return;
         }
 
-        BigDecimal amount = lerBigDecimal("Digite o valor a ser depositado: ");
+        BigDecimal amount = lerBigDecimal("Digite o valor a ser depositado");
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            System.out.println("Valor inválido para depósito. O valor deve ser maior que zero.");
+            return;
+        }
 
         try {
             bankTransactionService.deposit(account, amount);
@@ -548,7 +607,7 @@ public class BankSystemConsoleApp {
             return;
         }
 
-        BigDecimal amount = lerBigDecimal("Digite o valor a ser sacado: ");
+        BigDecimal amount = lerBigDecimal("Digite o valor a ser sacado");
 
         try {
             bankTransactionService.withdraw(account, amount);
@@ -583,7 +642,7 @@ public class BankSystemConsoleApp {
 
     private static BigDecimal lerBigDecimal(String mensagem) {
         while (true) {
-            System.out.print(mensagem + "(ou digite 0 para cancelar): ");
+            System.out.print(mensagem + " (ou digite 0 para cancelar): ");
             String entrada = scanner.nextLine();
 
             try {

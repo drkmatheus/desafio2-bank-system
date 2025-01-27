@@ -109,6 +109,10 @@ public class BankClient {
         return this.active;
     }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     // Método auxiliar para adicionar uma conta
     public void addBankAccount(BankAccount bankAccount) {
         bankAccounts.add(bankAccount);

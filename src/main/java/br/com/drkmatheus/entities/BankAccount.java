@@ -124,8 +124,12 @@ public class BankAccount {
         this.active = false;
     }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public boolean isActive() {
-        return this.active;
+        return active;
     }
 
 //    public List<BankTransaction> getBankTransactions() {

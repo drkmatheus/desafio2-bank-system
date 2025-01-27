@@ -1,13 +1,16 @@
 package br.com.drkmatheus.dao;
 
 import br.com.drkmatheus.config.HibernateUtil;
+import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankClient;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.Optional;
+import java.util.Scanner;
 
 
 public class BankClientDAOImpl implements BankClientDAO {
@@ -66,16 +69,63 @@ public class BankClientDAOImpl implements BankClientDAO {
 
             // Verifica a senha
             if (rawPassword.equals(bankClient.getPassword())) {
+                if (!bankClient.isActive()) {
+                    Scanner scanner = new Scanner(System.in);
+                    System.out.println("Esta conta está desativada. Deseja reativá-la?");
+                    System.out.println("1 - Sim");
+                    System.out.println("2 - Não");
+                    System.out.print("Digite sua opção: ");
+
+                    int opcao = scanner.nextInt();
+
+                    if (opcao == 1) {
+                        this.reactivateAccount(bankClient);
+                        System.out.println("Conta reativada com sucesso!");
+                        return Optional.of(bankClient);
+                    }
+                    else {
+                        System.out.println("Login cancelado.");
+                        return Optional.empty();
+                    }
+                }
                 return Optional.of(bankClient);
             } else {
                 System.out.println("Senha incorreta. Tente novamente.");
                 return Optional.empty();
             }
+
         } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();
         }
     }
+
+    @Override
+    public void reactivateAccount(BankClient bankClient) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+            try {
+                if (bankClient.isActive()) {
+                    System.out.println("A conta já está ativa");
+                    return;
+                }
+
+                bankClient.setActive(true);
+                // Também reativa a conta bancária associada
+                for (BankAccount account : bankClient.getBankAccounts()) {
+                    account.setActive(true);
+                    session.update(account);
+                }
+                session.update(bankClient);
+
+                transaction.commit();
+            } catch (Exception e) {
+                transaction.rollback();
+                throw e;
+            }
+        }
+    }
+
 
 //    @Override
 //    public Optional<BankClient> login(String cpf, String rawPassword) {
@@ -131,6 +181,23 @@ public class BankClientDAOImpl implements BankClientDAO {
         }
         catch (Exception e) {
             throw new RuntimeException("Erro ao salvar o cliente", e);
+        }
+    }
+
+    public void update(BankClient cliente) {
+        Session session = HibernateUtil.openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            session.update(cliente); // Atualiza o cliente no banco de dados
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Erro ao atualizar cliente: " + e.getMessage(), e);
+        } finally {
+            session.close();
         }
     }
 

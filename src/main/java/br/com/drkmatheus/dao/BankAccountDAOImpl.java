@@ -33,6 +33,32 @@ public class BankAccountDAOImpl implements BankAccountDAO {
     }
 
     @Override
+    public void delete(BankAccount bankAccount) {
+        // Obtém a sessão atual do Hibernate
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        Transaction transaction = null;
+
+        try {
+            // Inicia a transação
+            transaction = session.beginTransaction();
+
+            // Exclui a conta bancária, utilizando o método delete do Hibernate
+            session.delete(bankAccount);
+
+            // Comita a transação
+            transaction.commit();
+        } catch (Exception e) {
+            // Caso ocorra algum erro, faz o rollback da transação
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            session.close();
+        }
+    }
+
+    @Override
     public BankAccount createAccount(BankClient client, String typeName) {
         try (Session session = sessionFactory.openSession()) {
             // procura tipo de conta
@@ -99,8 +125,6 @@ public class BankAccountDAOImpl implements BankAccountDAO {
                 transaction.rollback();
                 throw e;
             }
-
         }
-
     }
 }

@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface BankAccountDAO {
     void save(BankAccount bankAccount);
+    void delete(BankAccount bankAccount);
     BankAccount createAccount(BankClient client, String typeName);
     Optional<BankAccount> findById(int id);
     void updateAccount(BankAccount bankAccount);

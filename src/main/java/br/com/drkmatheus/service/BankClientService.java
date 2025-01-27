@@ -65,6 +65,35 @@ public class BankClientService {
         System.out.println("Conta do tipo " + bankAccountType.getTypeName() + " adicionada com sucesso!");
     }
 
+    public void removeAccountType(BankClient bankClient, int accountType) {
+        // Busca o tipo de conta no bd
+        BankAccountType bankAccountType = bankAccountTypeDAO.findById(accountType)
+                .orElseThrow(() -> new IllegalArgumentException("Tipo de conta inexistente"));
+
+        // pega a conta existente do cliente
+        BankAccount contaExistente = bankClient.getBankAccounts().get(0);
+
+        // verifica se cliente tem esse tipo de conta
+        Set<Integer> accountTypeIds = contaExistente.getAccountTypeIds();
+        if (!accountTypeIds.contains(accountType)) {
+            throw new IllegalArgumentException("Você não possui uma conta desse tipo.");
+        }
+
+        // verifica se é o único tipo de conta
+        if (accountTypeIds.size() == 1) {
+            throw new IllegalArgumentException("Não é possível remover o único tipo de conta. A conta deve ter pelo menos um tipo.");
+        }
+
+        // remove o tipo de conta da lista de tipos de conta
+        accountTypeIds.remove(accountType);
+        contaExistente.setAccountTypeIds(accountTypeIds);
+
+        // atualiza a conta no bd
+        bankAccountDAO.updateAccount(contaExistente);
+
+        System.out.println("Conta do tipo " + bankAccountType.getTypeName() + " removida com sucesso!");
+    }
+
     public void registerNewClient(BankClient bankClient, String rawPassword, int tipoContaId) {
         Session session = HibernateUtil.openSession();
         Transaction transaction = null;
@@ -103,6 +132,15 @@ public class BankClientService {
              }
          }
 
+    }
+
+    public void reactivateAccount(BankClient bankClient) {
+        if (bankClient.isActive()) {
+            System.out.println("A conta ja está ativa");
+        }
+
+        bankClient.setActive(true);
+        bankClientDAO.update(bankClient);
     }
 
     private BankAccountType searchBankAccountTypeById(Session session, String nomeTipoConta) {

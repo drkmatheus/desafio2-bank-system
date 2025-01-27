@@ -14,7 +14,7 @@ USE bank_system;
 -- Tabela para os tipos de conta
 CREATE TABLE account_type (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    type_name VARCHAR(50) NOT NULL UNIQUE,
+    type_name VARCHAR(50) NOT NULL UNIQUE
 );
 
 -- Inserir tipos de conta
