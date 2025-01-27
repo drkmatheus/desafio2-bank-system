@@ -261,6 +261,7 @@ public class BankSystemConsoleApp {
         while (true) {
             System.out.println("\n--- BEM-VINDO " + cliente.getClientName().toUpperCase() + " ---");
             System.out.println("ID da conta: " + account.getIdAccount());
+            System.out.println("Status da conta: " + account.isActive());
             System.out.println("Você possui contas do tipo: \n");
             // obtem a conta existente do cliente
             BankAccount contaExistente = cliente.getBankAccounts().get(0);
@@ -289,6 +290,7 @@ public class BankSystemConsoleApp {
             System.out.println("5. Verificar Saldo");
             System.out.println("6. Transferência");
             System.out.println("7. Extrato");
+            System.out.println("8. Desativar conta");
             System.out.println("0. Voltar ao Menu Principal");
 
             int opcao = lerInteiro("Escolha uma opção: ");
@@ -315,11 +317,47 @@ public class BankSystemConsoleApp {
                 case 7:
                     imprimirExtrato(account);
                     break;
+                case 8:
+                    desativaConta(account);
+                    break;
                 case 0:
                     return;
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
             }
+        }
+    }
+
+    private static void desativaConta(BankAccount account) {
+        System.out.println("\n=== Desativação de Conta ===");
+
+        if (!account.isActive()) {
+            System.out.println("Voce nao tem permissao para desativar sua conta. Sua conta já está desativada.");
+            return;
+        }
+
+        System.out.println("Tem certeza que deseja desativar sua conta? Esta ação não poderá ser desfeita.");
+        System.out.println("1 - Sim");
+        System.out.println("2 - Não");
+        int opcao = lerInteiro("Digite sua opção: ");
+
+        if (opcao == 1) {
+            try {
+                SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+                Session session = sessionFactory.openSession();
+                BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session);
+                BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
+                BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
+                bankAccountDAO.deactivateAccount(account.getIdAccount());
+                System.out.println("Conta desativada com sucesso.");
+                System.out.println("Obrigado por utilizar nossos serviços.");
+                // Encerra o programa após desativação
+                System.exit(0);
+            } catch (Exception e) {
+                System.out.println("Erro ao desativar conta: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Operação cancelada.");
         }
     }
 
@@ -357,6 +395,11 @@ public class BankSystemConsoleApp {
         BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
         BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
 
+        if (!account.isActive()) {
+            System.out.println("Voce nao tem permissao para visualizar extratos. Sua conta está desativada.");
+            return;
+        }
+
         try {
             // obter lista de extrato (transacoes)
             List<BankTransaction> extrato = bankTransactionService.getTransactions(account);
@@ -387,6 +430,11 @@ public class BankSystemConsoleApp {
         BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
         BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
 
+        if (!originAccount.isActive()) {
+            System.out.println("Voce nao tem permissao para realizar transferencias. Sua conta está desativada.");
+            return;
+        }
+
         try {
             int idDestino = lerInteiro("Digite o ID da conta de destino: ");
 
@@ -414,6 +462,11 @@ public class BankSystemConsoleApp {
         BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
         BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
         BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
+
+        if (!account.isActive()) {
+            System.out.println("Voce nao tem permissao para verificar saldo. Sua conta está desativada.");
+            return;
+        }
 
         try {
             BigDecimal saldo = bankTransactionService.checkBalance(account);
@@ -444,6 +497,10 @@ public class BankSystemConsoleApp {
         BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, new BankAccountTypeDAOImpl(sessionFactory));
         BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
 
+        if (!account.isActive()) {
+            System.out.println("Voce nao tem permissao para realizar um deposito. Sua conta está desativada.");
+            return;
+        }
 
         BigDecimal amount = lerBigDecimal("Digite o valor a ser depositado: ");
 
@@ -464,6 +521,11 @@ public class BankSystemConsoleApp {
         BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
         BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
         BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
+
+        if (!account.isActive()) {
+            System.out.println("Voce nao tem permissao para realizar saques . Sua conta está desativada.");
+            return;
+        }
 
         BigDecimal amount = lerBigDecimal("Digite o valor a ser sacado: ");
 

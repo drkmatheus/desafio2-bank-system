@@ -30,6 +30,9 @@ public class BankClient {
     @Column(name = "password")
     private String password;
 
+    @Column(name = "active")
+    private boolean active;
+
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<BankAccount> bankAccounts = new ArrayList<>();
 
@@ -43,6 +46,7 @@ public class BankClient {
         this.birthDate = birthDate;
         this.cpf = cpf;
         this.password = password;
+        this.active = true;
     }
 
     public int getId() {
@@ -101,10 +105,19 @@ public class BankClient {
         this.bankAccounts = bankAccounts;
     }
 
+    public boolean isActive() {
+        return this.active;
+    }
+
     // Método auxiliar para adicionar uma conta
     public void addBankAccount(BankAccount bankAccount) {
         bankAccounts.add(bankAccount);
         bankAccount.setClient(this);
+    }
+
+    // para desativar o usuario
+    public void deactivate() {
+        this.active = false;
     }
 }
 

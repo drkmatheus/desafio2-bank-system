@@ -11,4 +11,5 @@ public interface BankAccountDAO {
     BankAccount createAccount(BankClient client, String typeName);
     Optional<BankAccount> findById(int id);
     void updateAccount(BankAccount bankAccount);
+    void deactivateAccount(int accountId);
 }

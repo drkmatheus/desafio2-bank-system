@@ -42,7 +42,17 @@ public class BankTransactionService {
     }
 
     public void transfer(BankAccount originAccount, BankAccount targetAccount, BigDecimal amount) {
-        // Realiza a verificacao da conta de origem para a transferência entre contas
+        // verifica se as 2 contas estão ativas
+        if (!originAccount.isActive() || !targetAccount.isActive()) {
+            throw new IllegalStateException("Não é possível realizar transferências com contas desativadas.");
+        }
+
+        // verifica se os 2 clientes estão ativos
+        if (!originAccount.getClient().isActive() || !targetAccount.getClient().isActive()) {
+            throw new IllegalStateException("Não é possível realizar transferências com clientes desativados.");
+        }
+
+        // verifica a conta de origem para a transferência
         if (originAccount.getBalance().compareTo(amount) < 0) {
             throw new IllegalArgumentException("Saldo insuficiente para realizar a transferencia.");
         }

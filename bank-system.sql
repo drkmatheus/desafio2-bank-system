@@ -14,7 +14,7 @@ USE bank_system;
 -- Tabela para os tipos de conta
 CREATE TABLE account_type (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    type_name VARCHAR(50) NOT NULL UNIQUE
+    type_name VARCHAR(50) NOT NULL UNIQUE,
 );
 
 -- Inserir tipos de conta
@@ -29,7 +29,8 @@ CREATE TABLE bank_client (
     password VARCHAR(100) NOT NULL,
     cpf VARCHAR(14) NOT NULL UNIQUE,
     phone VARCHAR(15),
-    birthdate DATE
+    birthdate DATE,
+    active BOOLEAN DEFAULT TRUE NOT NULL
 );
 
 -- Tabela para as contas bancárias
@@ -39,6 +40,7 @@ CREATE TABLE bank_account (
     account_type_id INT NOT NULL,
     account_types VARCHAR(255) DEFAULT '',
     balance DECIMAL(10, 2) DEFAULT 0.00,
+    active BOOLEAN DEFAULT TRUE NOT NULL,
     FOREIGN KEY (client_id) REFERENCES bank_client(id) ON DELETE CASCADE,
     FOREIGN KEY (account_type_id) REFERENCES account_type(id) ON DELETE CASCADE
 );

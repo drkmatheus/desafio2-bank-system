@@ -1,5 +1,6 @@
 package br.com.drkmatheus.dao;
 
+import br.com.drkmatheus.config.HibernateUtil;
 import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankAccountType;
 import br.com.drkmatheus.entities.BankClient;
@@ -69,5 +70,37 @@ public class BankAccountDAOImpl implements BankAccountDAO {
             if (tx != null) tx.rollback();
             throw new RuntimeException("Erro ao atualizar a conta", e);
         }
+    }
+
+    @Override
+    public void deactivateAccount(int accountId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            try {
+                // desativa conta
+                BankAccount account = session.get(BankAccount.class, accountId);
+                account.deactivate();
+
+                // desativa cliente
+                BankClient client = account.getClient();
+                client.deactivate();
+
+                // atualiza na memoria
+                session.update(account);
+                session.update(client);
+
+                // atualiza no bd
+
+                transaction.commit();
+
+            }
+            catch (Exception e) {
+                transaction.rollback();
+                throw e;
+            }
+
+        }
+
     }
 }

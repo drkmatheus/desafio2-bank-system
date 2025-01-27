@@ -33,6 +33,9 @@ public class BankAccount {
     @Column(name = "balance", precision = 10, scale = 2)
     private BigDecimal balance;
 
+    @Column(name = "active")
+    private boolean active;
+
 //    @OneToMany(mappedBy = "account")
 //    private List<BankTransaction> transactions;
 
@@ -45,6 +48,7 @@ public class BankAccount {
             this.accountType = accountType;
             this.balance = BigDecimal.ZERO;
             this.client = client;
+            this.active = true;
     }
 
     public int getIdAccount() {
@@ -113,6 +117,15 @@ public class BankAccount {
         this.accountTypes = accountTypeIds.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining(","));
+    }
+
+    // metodo para desativar conta
+    public void deactivate() {
+        this.active = false;
+    }
+
+    public boolean isActive() {
+        return this.active;
     }
 
 //    public List<BankTransaction> getBankTransactions() {
