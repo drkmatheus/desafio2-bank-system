@@ -6,6 +6,7 @@ import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankAccountType;
 import br.com.drkmatheus.entities.BankClient;
 import br.com.drkmatheus.entities.BankTransaction;
+import br.com.drkmatheus.exception.OperacaoCanceladaException;
 import br.com.drkmatheus.service.BankClientService;
 import br.com.drkmatheus.service.BankTransactionService;
 import org.hibernate.Session;
@@ -203,15 +204,16 @@ public class BankSystemConsoleApp {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Erro ao registrar cliente: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
     }
 
     private static void realizarLogin() {
         try {
-            System.out.print("Digite seu CPF: ");
+            System.out.print("Digite seu CPF ou digite 0 para cancelar o login: ");
             String cpf = scanner.nextLine();
+            verificarCancelamento(cpf);
 
             // validando cpf
             if (!CpfValidator.isValid(cpf)) {
@@ -219,7 +221,7 @@ public class BankSystemConsoleApp {
                 return;
             }
 
-            System.out.print("Digite sua senha: ");
+            System.out.print("Digite sua senha ou digite 0 para cancelar o login: ");
             String senha = scanner.nextLine();
 
             Optional<BankClient> clienteLogado = bankClientDAO.login(cpf, senha);
@@ -231,8 +233,9 @@ public class BankSystemConsoleApp {
                 System.out.println("CPF ou senha inválidos");
             }
         } catch (Exception e) {
-            System.out.println("Erro durante o login: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            //System.out.println("Erro durante o login: " + e.getMessage());
+            //e.printStackTrace();
         }
     }
 
@@ -261,7 +264,7 @@ public class BankSystemConsoleApp {
         while (true) {
             System.out.println("\n--- BEM-VINDO " + cliente.getClientName().toUpperCase() + " ---");
             System.out.println("ID da conta: " + account.getIdAccount());
-            System.out.println("Status da conta: " + account.isActive());
+            System.out.println("Status da conta: " + (account.isActive() ? "Ativo" : "Inativo"));
             System.out.println("Você possui contas do tipo: \n");
             // obtem a conta existente do cliente
             BankAccount contaExistente = cliente.getBankAccounts().get(0);
@@ -376,12 +379,18 @@ public class BankSystemConsoleApp {
             System.out.println("1 - Conta Corrente");
             System.out.println("2 - Conta Poupança");
             System.out.println("3 - Conta Salário");
+            System.out.println("0 - Cancelar");
             int tipoContaEscolhido = lerInteiro("Digite o número do tipo de conta: ");
+            switch (tipoContaEscolhido) {
+                case 0:
+                    return;
+            }
 
             bankClientService.addAccountType(cliente, tipoContaEscolhido);
         }
         catch (Exception e) {
-            System.out.println("Erro ao adicionar tipo de conta: " + e.getMessage());
+            System.out.println(e.getMessage());
+            //System.out.println("Erro ao adicionar tipo de conta: " + e.getMessage());
         } finally {
             session.close();
         }
@@ -438,11 +447,23 @@ public class BankSystemConsoleApp {
         try {
             int idDestino = lerInteiro("Digite o ID da conta de destino: ");
 
+            // verifica ID da conta de destino é o mesmo da conta de origem
+            if (idDestino == originAccount.getIdAccount()) {
+                System.out.println("Erro: Voce nao pode transferir para a propria conta.");
+                return;
+            }
+
             BigDecimal amount = lerBigDecimal("Digite o valor a ser transferido: ");
 
             // busca a conta de destino pelo ID
             BankAccount targetAccount = bankAccountDAO.findById(idDestino)
                     .orElseThrow(() -> new IllegalArgumentException("Conta de destino nao encontrada"));
+
+            // verifica se a conta de destino esta ativa
+            if (!targetAccount.isActive()) {
+                System.out.println("Erro: A conta de destino está desativada.");
+                return;
+            }
             // realiza a transferencia
             bankTransactionService.transfer(originAccount, targetAccount, amount);
             System.out.println("Transferencia realizada com sucesso!");
@@ -523,7 +544,7 @@ public class BankSystemConsoleApp {
         BankTransactionService bankTransactionService = new BankTransactionService(bankTransactionDAO, bankAccountDAO);
 
         if (!account.isActive()) {
-            System.out.println("Voce nao tem permissao para realizar saques . Sua conta está desativada.");
+            System.out.println("Voce nao tem permissao para realizar saques. Sua conta está desativada.");
             return;
         }
 
@@ -543,10 +564,15 @@ public class BankSystemConsoleApp {
 
     private static int lerInteiro(String mensagem) {
         while (true) {
-            System.out.print(mensagem);
-            String entrada = scanner.nextLine();
+            System.out.print(mensagem + " (ou digite 0 para cancelar): ");
+            String entrada = scanner.nextLine().trim();
 
             try {
+                int valor = Integer.parseInt(entrada);
+                if (valor == 0) {
+                    throw new OperacaoCanceladaException("Operação cancelada pelo usuário.");
+                }
+
                 return Integer.parseInt(entrada);
             }
             catch (NumberFormatException e) {
@@ -557,11 +583,15 @@ public class BankSystemConsoleApp {
 
     private static BigDecimal lerBigDecimal(String mensagem) {
         while (true) {
-            System.out.print(mensagem);
+            System.out.print(mensagem + "(ou digite 0 para cancelar): ");
             String entrada = scanner.nextLine();
 
             try {
-                return new BigDecimal(entrada);
+                BigDecimal valor = new BigDecimal(entrada);
+                if (valor.compareTo(BigDecimal.ZERO) == 0) {
+                    throw new OperacaoCanceladaException("Operação cancelada pelo usuário.");
+                }
+                return valor;
             }
             catch (NumberFormatException e) {
                 System.out.println("Entrada inválida. Digite um numero.");
@@ -569,9 +599,15 @@ public class BankSystemConsoleApp {
         }
     }
 
+    private static void verificarCancelamento(String entrada) {
+        if (entrada.equalsIgnoreCase("0") || entrada.equalsIgnoreCase("cancelar")) {
+            throw new OperacaoCanceladaException("Operação cancelada pelo usuário.");
+        }
+    }
+
     private static int validarTipoConta() {
         while (true) {
-            int tipoConta = lerInteiro("Digite o tipo de conta: ");
+            int tipoConta = lerInteiro("Digite o tipo de conta");
 
             // verifica se o tipo da conta está entre 1 e 3
             if (tipoConta >= 1 && tipoConta <= 3) {
