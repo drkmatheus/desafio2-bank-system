@@ -26,7 +26,7 @@ INSERT INTO account_type (type_name) VALUES ('Conta Salário');
 CREATE TABLE bank_client (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    password VARCHAR(100) NOT NULL
+    password VARCHAR(100) NOT NULL,
     cpf VARCHAR(14) NOT NULL UNIQUE,
     phone VARCHAR(15),
     birthdate DATE

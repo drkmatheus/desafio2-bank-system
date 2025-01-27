@@ -260,6 +260,7 @@ public class BankSystemConsoleApp {
         BankAccount account = cliente.getBankAccounts().getFirst();
         while (true) {
             System.out.println("\n--- BEM-VINDO " + cliente.getClientName().toUpperCase() + " ---");
+            System.out.println("ID da conta: " + account.getIdAccount());
             System.out.println("Você possui contas do tipo: \n");
             // obtem a conta existente do cliente
             BankAccount contaExistente = cliente.getBankAccounts().get(0);
