@@ -63,7 +63,7 @@ public class BankAccountDAOImpl implements BankAccountDAO {
         try (Session session = sessionFactory.openSession()) {
             // procura tipo de conta
             Optional<BankAccountType> bankAccountType = Optional.ofNullable(bankAccountTypeDAO.findByTypeName(typeName)
-                    .orElseThrow(() -> new IllegalArgumentException("Tipo de conta inválida")));
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid Account Type.")));
 
             // criar nova conta
             BankAccount newBankAccount = new BankAccount();
@@ -94,7 +94,7 @@ public class BankAccountDAOImpl implements BankAccountDAO {
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
-            throw new RuntimeException("Erro ao atualizar a conta", e);
+            throw new RuntimeException("Error in updating account.", e);
         }
     }
 

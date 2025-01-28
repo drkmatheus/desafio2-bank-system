@@ -6,7 +6,7 @@ import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankAccountType;
 import br.com.drkmatheus.entities.BankClient;
 import br.com.drkmatheus.entities.BankTransaction;
-import br.com.drkmatheus.exception.OperacaoCanceladaException;
+import br.com.drkmatheus.exception.OperationCancelledException;
 import br.com.drkmatheus.service.BankClientService;
 import br.com.drkmatheus.service.BankTransactionService;
 import org.hibernate.Session;
@@ -59,7 +59,6 @@ public class BankSystemConsoleApp {
             catch (NumberFormatException e) {
                 System.out.println("Entrada inválida. Digite um número.");
             }
-
         }
     }
 
@@ -130,11 +129,6 @@ public class BankSystemConsoleApp {
 
             }
 
-//            while (bankClientDAO.cpfExists(novoCliente.getCpf())) {
-//                System.out.println("CPF já existente");
-//                System.out.print("Digite o CPF (formato 000.000.000-00): ");
-//                novoCliente.setCpf(scanner.nextLine());
-//            }
 
             // validacao telefone
             String phone;
@@ -234,26 +228,6 @@ public class BankSystemConsoleApp {
             System.out.println(e.getMessage());
             //System.out.println("Erro durante o login: " + e.getMessage());
             //e.printStackTrace();
-        }
-    }
-
-    private static BankAccountType buscarTipoContaPorId(int tipoContaEscolhido) {
-        try (Session session = HibernateUtil.openSession()) {
-            System.out.println("Buscando tipo de conta com ID: " + tipoContaEscolhido);
-
-            // Tente buscar o BankAccountType pelo ID diretamente
-            BankAccountType tipoConta = session.get(BankAccountType.class, tipoContaEscolhido);
-
-            if (tipoConta == null) {
-                System.out.println("Tipo de conta não encontrado. ID: " + tipoContaEscolhido);
-            } else {
-                System.out.println("Tipo de conta encontrado: " + tipoConta.getTypeName());
-            }
-
-            return tipoConta;
-        } catch (Exception e) {
-            System.out.println("Erro ao buscar tipo de conta no banco: " + e.getMessage());
-            return null;
         }
     }
 
@@ -506,12 +480,7 @@ public class BankSystemConsoleApp {
                 return;
             }
 
-
-
             BankAccount targetAccount = optionalTargetAccount.get();
-
-//            BankAccount targetAccount = bankAccountDAO.findById(idDestino)
-//                    .orElseThrow(() -> new IllegalArgumentException("Conta de destino nao encontrada"));
 
             // verifica se a conta de destino esta ativa
             if (!targetAccount.isActive()) {
@@ -629,7 +598,7 @@ public class BankSystemConsoleApp {
             try {
                 int valor = Integer.parseInt(entrada);
                 if (valor == 0) {
-                    throw new OperacaoCanceladaException("Operação cancelada pelo usuário.");
+                    throw new OperationCancelledException("Operação cancelada pelo usuário.");
                 }
 
                 return Integer.parseInt(entrada);
@@ -648,7 +617,7 @@ public class BankSystemConsoleApp {
             try {
                 BigDecimal valor = new BigDecimal(entrada);
                 if (valor.compareTo(BigDecimal.ZERO) == 0) {
-                    throw new OperacaoCanceladaException("Operação cancelada pelo usuário.");
+                    throw new OperationCancelledException("Operação cancelada pelo usuário.");
                 }
                 return valor;
             }
@@ -660,7 +629,7 @@ public class BankSystemConsoleApp {
 
     private static void verificarCancelamento(String entrada) {
         if (entrada.equalsIgnoreCase("0") || entrada.equalsIgnoreCase("cancelar")) {
-            throw new OperacaoCanceladaException("Operação cancelada pelo usuário.");
+            throw new OperationCancelledException("Operação cancelada pelo usuário.");
         }
     }
 

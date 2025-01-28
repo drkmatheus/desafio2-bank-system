@@ -22,7 +22,7 @@ public class BankTransactionDAOImpl implements BankTransactionDAO {
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
-            throw new RuntimeException("Erro ao salvar a transação", e);
+            throw new RuntimeException("Error on saving transaction.", e);
         }
     }
 

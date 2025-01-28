@@ -61,7 +61,7 @@ public class BankClientDAOImpl implements BankClientDAO {
             Optional<BankClient> optionalClient = findByCpf(cpf);
 
             if (optionalClient.isEmpty()) {
-                System.out.println("Cliente não encontrado com o CPF: " + cpf);
+                System.out.println("Client's CPF not found: " + cpf);
                 return Optional.empty();
             }
 
@@ -71,26 +71,27 @@ public class BankClientDAOImpl implements BankClientDAO {
             if (rawPassword.equals(bankClient.getPassword())) {
                 if (!bankClient.isActive()) {
                     Scanner scanner = new Scanner(System.in);
-                    System.out.println("Esta conta está desativada. Deseja reativá-la?");
-                    System.out.println("1 - Sim");
-                    System.out.println("2 - Não");
-                    System.out.print("Digite sua opção: ");
+                    System.out.println("\n" +
+                            "This account is deactivated. Do you want to reactivate it?");
+                    System.out.println("1 - Yes");
+                    System.out.println("2 - No");
+                    System.out.print("Enter your option: ");
 
                     int opcao = scanner.nextInt();
 
                     if (opcao == 1) {
                         this.reactivateAccount(bankClient);
-                        System.out.println("Conta reativada com sucesso!");
+                        System.out.println("Account reactivated successfully!");
                         return Optional.of(bankClient);
                     }
                     else {
-                        System.out.println("Login cancelado.");
+                        System.out.println("Login cancelled.");
                         return Optional.empty();
                     }
                 }
                 return Optional.of(bankClient);
             } else {
-                System.out.println("Senha incorreta. Tente novamente.");
+                System.out.println("Wrong password. Try again.");
                 return Optional.empty();
             }
 
@@ -106,7 +107,7 @@ public class BankClientDAOImpl implements BankClientDAO {
             Transaction transaction = session.beginTransaction();
             try {
                 if (bankClient.isActive()) {
-                    System.out.println("A conta já está ativa");
+                    System.out.println("The account is already active.");
                     return;
                 }
 
@@ -166,7 +167,7 @@ public class BankClientDAOImpl implements BankClientDAO {
             // verificando se ja existe cliente com mesmo cpf
             Optional<BankClient> check = findByCpf(bankClient.getCpf());
             if (check.isPresent()) {
-                throw new IllegalArgumentException("Já existe um cliente cadastrado com este CPF.");
+                throw new IllegalArgumentException("There is already a client registered with this CPF.");
             }
             session.beginTransaction();
 
@@ -180,7 +181,8 @@ public class BankClientDAOImpl implements BankClientDAO {
             session.getTransaction().commit();
         }
         catch (Exception e) {
-            throw new RuntimeException("Erro ao salvar o cliente", e);
+            throw new RuntimeException("\n" +
+                    "Error in saving client.", e);
         }
     }
 
@@ -195,7 +197,7 @@ public class BankClientDAOImpl implements BankClientDAO {
             if (transaction != null) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Erro ao atualizar cliente: " + e.getMessage(), e);
+            throw new RuntimeException("\"Error in saving client: " + e.getMessage(), e);
         } finally {
             session.close();
         }

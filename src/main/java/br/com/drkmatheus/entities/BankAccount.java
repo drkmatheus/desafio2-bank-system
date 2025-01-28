@@ -89,17 +89,17 @@ public class BankAccount {
 
     public void withdraw(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("O valor deve ser maior que zero");
+            throw new IllegalArgumentException("Value must be greater than zero.");
         }
         if (this.balance.compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Saldo insuficiente para realizar saque.");
+            throw new IllegalArgumentException("Insufficient funds.");
         }
         this.balance = balance.subtract(amount);
     }
 
     public void deposit(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("O valor deve ser maior que zero");
+            throw new IllegalArgumentException("Value must be greater than zero.");
         }
         this.balance = balance.add(amount);
     }
@@ -116,7 +116,7 @@ public class BankAccount {
     public void setAccountTypeIds(Set<Integer> accountTypeIds) {
         this.accountTypes = accountTypeIds.stream()
                 .map(String::valueOf)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.joining(",")); // <========= Comentar
     }
 
     // metodo para desativar conta
