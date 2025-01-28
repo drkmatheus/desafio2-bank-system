@@ -18,9 +18,9 @@ CREATE TABLE account_type (
 );
 
 -- Inserir tipos de conta
-INSERT INTO account_type (type_name) VALUES ('Conta Corrente');
-INSERT INTO account_type (type_name) VALUES ('Conta Poupança');
-INSERT INTO account_type (type_name) VALUES ('Conta Salário');
+INSERT INTO account_type (type_name) VALUES ('Checking Account');
+INSERT INTO account_type (type_name) VALUES ('Savings Account');
+INSERT INTO account_type (type_name) VALUES ('Salary Account');
 
 -- Tabela para os clientes bancários
 CREATE TABLE bank_client (
@@ -54,34 +54,3 @@ CREATE TABLE bank_transaction (
     transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (account_id) REFERENCES bank_account(id) ON DELETE CASCADE
 );
-
--- Exemplo de inserção de clientes
-INSERT INTO bank_client (name, cpf, phone, birthdate, password)
-VALUES ('João Silva', '123.456.789-00', '11987654321', '1990-05-15', '$2a$10$GxQ5x4RjG4z3zMz3z4RjG4z3zMz3z4RjG4z3zMz3z4RjG4z3zMz3');
-
-INSERT INTO bank_client (name, cpf, phone, birthdate, password)
-VALUES ('Maria Oliveira', '987.654.321-00', '11876543210', '1985-09-22', '$2a$10$GxQ5x4RjG4z3zMz3z4RjG4z3zMz3z4RjG4z3zMz3z4RjG4z3zMz3');
-
--- Exemplo de criação de contas para os clientes
--- Criando uma conta para João Silva (Conta Corrente)
-INSERT INTO bank_account (client_id, account_type_id, balance) 
-VALUES ((SELECT id FROM bank_client WHERE cpf = '123.456.789-00'), 
-        (SELECT id FROM account_type WHERE type_name = 'Conta Corrente'), 
-        1000.00);
-
--- Criando uma conta para Maria Oliveira (Conta Poupança)
-INSERT INTO bank_account (client_id, account_type_id, balance) 
-VALUES ((SELECT id FROM bank_client WHERE cpf = '987.654.321-00'), 
-        (SELECT id FROM account_type WHERE type_name = 'Conta Poupança'), 
-        1500.00);
-
--- Exemplo de inserção de transações
--- Transação de saque para João Silva
-INSERT INTO bank_transaction (account_id, transaction_type, amount)
-VALUES ((SELECT id FROM bank_account WHERE client_id = (SELECT id FROM bank_client WHERE cpf = '123.456.789-00')),
-        'SAQUE', 200.00);
-
--- Transação de depósito para Maria Oliveira
-INSERT INTO bank_transaction (account_id, transaction_type, amount)
-VALUES ((SELECT id FROM bank_account WHERE client_id = (SELECT id FROM bank_client WHERE cpf = '987.654.321-00')),
-        'DEPÓSITO', 500.00);

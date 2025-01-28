@@ -306,7 +306,8 @@ public class App {
         System.out.println("Are you sure you want to deactivate your account? This action cannot be undone.");
         System.out.println("1 - Yes");
         System.out.println("2 - No");
-        int option = readInteger("Enter your option");
+        System.out.print(("Enter your option: "));
+        int option = scanner.nextInt();
 
         if (option == 1) {
             try {
@@ -344,7 +345,9 @@ public class App {
             System.out.println("2 - Savings Account");
             System.out.println("3 - Salary Account");
             System.out.println("0 - Cancel");
-            int selectedAccountType = readInteger("Enter the account type number");
+            System.out.print(("Enter the account type number: "));
+            int selectedAccountType = scanner.nextInt();
+
             switch (selectedAccountType) {
                 case 0:
                     return;
@@ -375,7 +378,9 @@ public class App {
             System.out.println("2 - Savings Account");
             System.out.println("3 - Salary Account");
             System.out.println("0 - Cancel");
-            int selectedAccountType = readInteger("Enter the account type number");
+            System.out.print(("Enter the account type number: "));
+            int selectedAccountType = scanner.nextInt();
+
             switch (selectedAccountType) {
                 case 0:
                     return;
@@ -436,7 +441,8 @@ public class App {
         }
 
         try {
-            int targetAccountId = readInteger("Enter the target account ID");
+            System.out.print(("Enter the target account ID: "));
+            int targetAccountId = scanner.nextInt();
 
             if (targetAccountId <= 0) {
                 System.out.println("Error: Negative ID.");
@@ -569,8 +575,8 @@ public class App {
     private static int readInteger(String message) {
         while (true) {
             System.out.print(message + " (or type 0 to cancel): ");
-            scanner.nextLine();
-            String input = scanner.nextLine().trim();
+            //scanner.nextLine();
+            String input = scanner.nextLine();
 
             try {
                 int value = Integer.parseInt(input);
@@ -613,7 +619,7 @@ public class App {
 
     private static int validateAccountType() {
         while (true) {
-            scanner.nextLine();
+            //scanner.next();
             int accountType = readInteger("Enter the account type");
 
             // Check if the account type is between 1 and 3

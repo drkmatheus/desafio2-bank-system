@@ -42,7 +42,7 @@ public class BankClientService {
 
     public void addAccountType(BankClient bankClient, int accountType) {
         // Busca o tipo de conta no bd
-        BankAccountType bankAccountType = bankAccountTypeDAO.findById(accountType).orElseThrow(() -> new IllegalArgumentException("Tipo de conta inexistente"));
+        BankAccountType bankAccountType = bankAccountTypeDAO.findById(accountType).orElseThrow(() -> new IllegalArgumentException("Non-existent account type"));
 
         // pega a conta existente do cliente
         BankAccount contaExistente = bankClient.getBankAccounts().get(0);
@@ -50,7 +50,7 @@ public class BankClientService {
         // verifica se cliente ja tem esse tipo de conta
         Set<Integer> accountTypeIds = contaExistente.getAccountTypeIds();
         if (accountTypeIds.contains(accountType)) {
-            throw new IllegalArgumentException("Você já possui uma conta desse tipo.");
+            throw new IllegalArgumentException("You already have such an account.");
         }
         // adiciona o novo tipo de conta a lista de tipos de conta
         accountTypeIds.add(accountType);
@@ -59,16 +59,16 @@ public class BankClientService {
         // atualiza a conta no bd
         bankAccountDAO.updateAccount(contaExistente);
         if (bankClient.getBankAccounts().stream().anyMatch(account -> account.getAccountType().getId() == accountType)) {
-            throw new IllegalArgumentException("Você já possui uma conta desse tipo.");
+            throw new IllegalArgumentException("You already have such an account.");
         }
 
-        System.out.println("Conta do tipo " + bankAccountType.getTypeName() + " adicionada com sucesso!");
+        System.out.println("Account type " + bankAccountType.getTypeName() + " added successfully!");
     }
 
     public void removeAccountType(BankClient bankClient, int accountType) {
         // Busca o tipo de conta no bd
         BankAccountType bankAccountType = bankAccountTypeDAO.findById(accountType)
-                .orElseThrow(() -> new IllegalArgumentException("Tipo de conta inexistente"));
+                .orElseThrow(() -> new IllegalArgumentException("Non-existent account type"));
 
         // pega a conta existente do cliente
         BankAccount contaExistente = bankClient.getBankAccounts().get(0);
@@ -76,12 +76,12 @@ public class BankClientService {
         // verifica se cliente tem esse tipo de conta
         Set<Integer> accountTypeIds = contaExistente.getAccountTypeIds();
         if (!accountTypeIds.contains(accountType)) {
-            throw new IllegalArgumentException("Você não possui uma conta desse tipo.");
+            throw new IllegalArgumentException("You do not have such an account.");
         }
 
         // verifica se é o único tipo de conta
         if (accountTypeIds.size() == 1) {
-            throw new IllegalArgumentException("Não é possível remover o único tipo de conta. A conta deve ter pelo menos um tipo.");
+            throw new IllegalArgumentException("Cannot remove only account type. Account must have at least one type.");
         }
 
         // remove o tipo de conta da lista de tipos de conta
@@ -91,7 +91,7 @@ public class BankClientService {
         // atualiza a conta no bd
         bankAccountDAO.updateAccount(contaExistente);
 
-        System.out.println("Conta do tipo " + bankAccountType.getTypeName() + " removida com sucesso!");
+        System.out.println("Account type " + bankAccountType.getTypeName() + " removed with success!");
     }
 
     public void registerNewClient(BankClient bankClient, String rawPassword, int tipoContaId) {
@@ -102,7 +102,7 @@ public class BankClientService {
              BankAccountType accountType = session.get(BankAccountType.class, tipoContaId);
 
              if (accountType == null) {
-                 throw new IllegalArgumentException("Tipo inexistente");
+                 throw new IllegalArgumentException("Non-existent type selected");
              }
 
              BankAccount bankAccount = new BankAccount();
@@ -112,7 +112,7 @@ public class BankClientService {
 
              // testa se o cpf ja existe no banco
              if (bankClientDAO.cpfExists(bankClient.getCpf())) {
-                 throw new IllegalArgumentException("CPF já existente");
+                 throw new IllegalArgumentException("This CPF is already in use");
              }
 
              // criptografa senha
@@ -125,7 +125,7 @@ public class BankClientService {
          }
          catch (Exception e) {
              if (transaction != null) transaction.rollback();
-             throw new RuntimeException("Erro ao registrar cliente e conta", e);
+             throw new RuntimeException("Error registering customer and account", e);
          } finally {
              if (session != null && session.isOpen()) {
                  session.close();
@@ -136,7 +136,7 @@ public class BankClientService {
 
     public void reactivateAccount(BankClient bankClient) {
         if (bankClient.isActive()) {
-            System.out.println("A conta ja está ativa");
+            System.out.println("The account is already active");
         }
 
         bankClient.setActive(true);

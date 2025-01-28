@@ -21,7 +21,7 @@ public class BankTransactionService {
         // Realiza o depósito
         account.setBalance(account.getBalance().add(amount)); // Atualiza o saldo da conta
         bankAccountDAO.updateAccount(account);
-        BankTransaction transaction = new BankTransaction(account, "Depósito", amount);
+        BankTransaction transaction = new BankTransaction(account, "Deposit", amount);
         bankTransactionDAO.saveTransaction(transaction); // Salva a transação no banco de dados
     }
 
@@ -33,7 +33,7 @@ public class BankTransactionService {
         bankAccountDAO.updateAccount(account);
 
         // cria e salva transacao
-        BankTransaction transaction = new BankTransaction(account, "Saque", amount);
+        BankTransaction transaction = new BankTransaction(account, "Withdraw", amount);
         bankTransactionDAO.saveTransaction(transaction);
     }
 
@@ -44,17 +44,17 @@ public class BankTransactionService {
     public void transfer(BankAccount originAccount, BankAccount targetAccount, BigDecimal amount) {
         // verifica se as 2 contas estão ativas
         if (!originAccount.isActive() || !targetAccount.isActive()) {
-            throw new IllegalStateException("Não é possível realizar transferências com contas desativadas.");
+            throw new IllegalStateException("It is not possible to make transfers with deactivated accounts.");
         }
 
         // verifica se os 2 clientes estão ativos
         if (!originAccount.getClient().isActive() || !targetAccount.getClient().isActive()) {
-            throw new IllegalStateException("Não é possível realizar transferências com clientes desativados.");
+            throw new IllegalStateException("It is not possible to make transfers with deactivated clients.");
         }
 
         // verifica a conta de origem para a transferência
         if (originAccount.getBalance().compareTo(amount) < 0) {
-            throw new IllegalArgumentException("Saldo insuficiente para realizar a transferencia.");
+            throw new IllegalArgumentException("Insufficient balance to make the transfer.");
         }
 
         // realiza o saque na conta de origem
@@ -66,8 +66,8 @@ public class BankTransactionService {
         bankAccountDAO.updateAccount(targetAccount);
 
         // registra as 2 transacoces
-        BankTransaction originTransaction = new BankTransaction(originAccount, "Transferencia (Débito)", amount);
-        BankTransaction targetTransaction = new BankTransaction(targetAccount, "Transferencia (Crédito)", amount);
+        BankTransaction originTransaction = new BankTransaction(originAccount, "Transfer (Debit)", amount);
+        BankTransaction targetTransaction = new BankTransaction(targetAccount, "Transfer (Credit)", amount);
 
         bankTransactionDAO.saveTransaction(originTransaction);
         bankTransactionDAO.saveTransaction(targetTransaction);
