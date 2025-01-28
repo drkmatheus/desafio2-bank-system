@@ -4,16 +4,12 @@ import br.com.drkmatheus.config.HibernateUtil;
 import br.com.drkmatheus.dao.BankAccountDAO;
 import br.com.drkmatheus.dao.BankAccountTypeDAO;
 import br.com.drkmatheus.dao.BankClientDAO;
-import br.com.drkmatheus.dao.BankClientDAOImpl;
 import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankAccountType;
 import br.com.drkmatheus.entities.BankClient;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 
-import java.math.BigDecimal;
 import java.util.Set;
 
 
@@ -22,12 +18,6 @@ public class BankClientService {
     private  BankAccountDAO bankAccountDAO;
     private  BankAccountTypeDAO bankAccountTypeDAO;
     //private final BCryptPasswordEncoder passwordEncoder;
-
-    // Construtor que recebe SessionFactory
-    public BankClientService(SessionFactory sessionFactory) {
-        this.bankClientDAO = new BankClientDAOImpl(sessionFactory);
-        //this.passwordEncoder = new BCryptPasswordEncoder();
-    }
 
     public BankClientService(BankClientDAO bankClientDAO) {
         this.bankClientDAO = bankClientDAO;
@@ -132,21 +122,6 @@ public class BankClientService {
              }
          }
 
-    }
-
-    public void reactivateAccount(BankClient bankClient) {
-        if (bankClient.isActive()) {
-            System.out.println("The account is already active");
-        }
-
-        bankClient.setActive(true);
-        bankClientDAO.update(bankClient);
-    }
-
-    private BankAccountType searchBankAccountTypeById(Session session, String nomeTipoConta) {
-        Query query = session.createQuery("FROM BankAccountType WHERE typeName = :type_name", BankAccountType.class);
-        query.setParameter("type_name", nomeTipoConta);
-        return (BankAccountType) query.uniqueResult();
     }
 
     // validador de forca da senha

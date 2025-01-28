@@ -1,7 +1,6 @@
 package br.com.drkmatheus.service;
 
 import br.com.drkmatheus.dao.BankAccountDAO;
-import br.com.drkmatheus.dao.BankAccountDAOImpl;
 import br.com.drkmatheus.dao.BankTransactionDAO;
 import br.com.drkmatheus.entities.BankAccount;
 import br.com.drkmatheus.entities.BankTransaction;

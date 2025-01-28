@@ -113,11 +113,11 @@ public class BankClient {
         this.active = active;
     }
 
-    // Método auxiliar para adicionar uma conta
-    public void addBankAccount(BankAccount bankAccount) {
-        bankAccounts.add(bankAccount);
-        bankAccount.setClient(this);
-    }
+//    // Método auxiliar para adicionar uma conta
+//    public void addBankAccount(BankAccount bankAccount) {
+//        bankAccounts.add(bankAccount);
+//        bankAccount.setClient(this);
+//    }
 
     // para desativar o usuario
     public void deactivate() {

@@ -11,7 +11,6 @@ import br.com.drkmatheus.service.BankClientService;
 import br.com.drkmatheus.service.BankTransactionService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -71,6 +70,7 @@ public class App {
         scanner = new Scanner(System.in);
     }
 
+    // print main menu
     private static void showMainMenu() {
         System.out.println("\n========= Main Menu =========");
         System.out.println("|| 1. Login                ||");
@@ -82,11 +82,9 @@ public class App {
 
     private static void registerNewClient() {
         Session session = HibernateUtil.openSession();
-        Transaction transaction = null;
+
         try {
             BankClient newClient = new BankClient();
-            BankAccount newAccount = new BankAccount();
-            BankAccountType bankAccountType = new BankAccountType();
 
             // Validating name
             String name;
@@ -217,9 +215,11 @@ public class App {
         }
     }
 
+    // prints all bank menu
     public static void bankMenu(BankClient bankClient) {
 
         BankAccount account = bankClient.getBankAccounts().getFirst();
+
         while (true) {
             System.out.println("\n--- WELCOME " + bankClient.getClientName().toUpperCase() + " ---");
             System.out.println("Account ID: " + account.getIdAccount());
@@ -243,7 +243,7 @@ public class App {
                 }
             }
 
-            System.out.println("=========== Bank Menu ===========");
+            System.out.println("\n=========== Bank Menu ===========");
             System.out.println("|| 1. Deposit                  ||");
             System.out.println("|| 2. Withdraw                 ||");
             System.out.println("|| 3. Check Balance            ||");
@@ -295,6 +295,7 @@ public class App {
         }
     }
 
+    // method to deactivate an account
     private static void deactivateAccount(BankAccount account) {
         System.out.println("\n=== Account Deactivation ===");
 
@@ -311,14 +312,16 @@ public class App {
 
         if (option == 1) {
             try {
+
                 SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
                 Session session = sessionFactory.openSession();
-                BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session);
+                //BankTransactionDAO bankTransactionDAO = new BankTransactionDAOImpl(session);
                 BankAccountTypeDAO bankAccountTypeDAO = new BankAccountTypeDAOImpl(sessionFactory);
                 BankAccountDAO bankAccountDAO = new BankAccountDAOImpl(sessionFactory, bankAccountTypeDAO);
                 bankAccountDAO.deactivateAccount(account.getIdAccount());
                 System.out.println("Account deactivated successfully.");
                 System.out.println("Thank you for using our services.");
+
                 // Ends the program after deactivation
                 System.exit(0);
             } catch (Exception e) {
@@ -329,6 +332,7 @@ public class App {
         }
     }
 
+    // method to remove a bank account type from an existing account
     private static void removeAccountTypeFromExistingAccount(BankClient client) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
@@ -346,6 +350,7 @@ public class App {
             System.out.println("3 - Salary Account");
             System.out.println("0 - Cancel");
             System.out.print(("Enter the account type number: "));
+
             int selectedAccountType = scanner.nextInt();
 
             switch (selectedAccountType) {
@@ -362,6 +367,7 @@ public class App {
         }
     }
 
+    // method to add a bank account type from an existing account
     private static void addAccountTypeToExistingAccount(BankClient client) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
@@ -379,6 +385,7 @@ public class App {
             System.out.println("3 - Salary Account");
             System.out.println("0 - Cancel");
             System.out.print(("Enter the account type number: "));
+
             int selectedAccountType = scanner.nextInt();
 
             switch (selectedAccountType) {
@@ -395,6 +402,7 @@ public class App {
         }
     }
 
+    // method to print a statement of the current account in session
     private static void printStatement(BankAccount account) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
@@ -421,12 +429,13 @@ public class App {
                         bankTransaction.getTransactionAmount());
             }
         } catch (Exception e) {
-            System.out.println("Error printing statement: " + e.getMessage());
+            System.out.println("\nError printing statement: " + e.getMessage());
         } finally {
             session.close();
         }
     }
 
+    // method to perform a transference operation
     private static void performTransfer(BankAccount originAccount) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
@@ -486,6 +495,7 @@ public class App {
         }
     }
 
+    // method to print balance of the account
     private static void checkBalance(BankAccount account) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = sessionFactory.openSession();
@@ -509,6 +519,7 @@ public class App {
         }
     }
 
+    // method to display personal infos on db
     private static void displayPersonalInformation(BankClient client) {
         System.out.println("\n--- PERSONAL INFORMATION ---");
         System.out.println("Name: " + client.getClientName());
@@ -518,6 +529,7 @@ public class App {
                 client.getBirthDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
     }
 
+    // method to perform a deposit operation
     private static void performDeposit(BankAccount account) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = HibernateUtil.openSession();
@@ -547,6 +559,7 @@ public class App {
         }
     }
 
+    // method to perform a withdraw operation
     private static void performWithdraw(BankAccount account) {
         SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
         Session session = HibernateUtil.openSession();
@@ -572,10 +585,10 @@ public class App {
         }
     }
 
+    // integer input helper
     private static int readInteger(String message) {
         while (true) {
             System.out.print(message + " (or type 0 to cancel): ");
-            //scanner.nextLine();
             String input = scanner.nextLine();
 
             try {
@@ -592,6 +605,7 @@ public class App {
         }
     }
 
+    // bigdecimal input helper
     private static BigDecimal readBigDecimal(String message) {
         while (true) {
             System.out.print(message + " (or type 0 to cancel): ");
@@ -611,12 +625,14 @@ public class App {
         }
     }
 
+    // canceller input helper
     private static void checkCancellation(String input) {
         if (input.equalsIgnoreCase("0") || input.equalsIgnoreCase("cancel")) {
             throw new OperationCancelledException("Operation cancelled by the user.");
         }
     }
 
+    // account type input helper
     private static int validateAccountType() {
         while (true) {
             //scanner.next();
